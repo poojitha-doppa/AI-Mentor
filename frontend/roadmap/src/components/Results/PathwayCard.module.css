@@ -1,0 +1,299 @@
+.card {
+  background-color: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 2px solid var(--medium-gray);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+  animation: slideUp 0.4s ease;
+}
+
+.card:hover {
+  box-shadow: 0 12px 24px rgba(108, 92, 231, 0.15);
+  border-color: var(--primary-purple);
+  transform: translateY(-4px);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  flex: 1;
+  margin-bottom: 0.75rem;
+}
+
+.dataSourceRow {
+  display: flex;
+  align-items: center;
+  margin-top: 0.5rem;
+}
+
+.badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.4rem 0.75rem;
+  border-radius: 4px;
+}
+
+.mediumDifficulty {
+  background-color: rgba(243, 156, 18, 0.1);
+  color: var(--warning-orange);
+}
+
+.highDifficulty {
+  background-color: rgba(231, 76, 60, 0.1);
+  color: var(--error-red);
+}
+
+.confidenceBadge {
+  background-color: rgba(39, 174, 96, 0.1);
+  color: var(--success-green);
+}
+
+.typeBadge {
+  background-color: rgba(108, 92, 231, 0.1);
+  color: var(--primary-purple);
+}
+
+.dataSource {
+  color: var(--primary-purple);
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  padding: 0.4rem 0.75rem;
+  background-color: rgba(108, 92, 231, 0.08);
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.dataSource:hover {
+  color: white;
+  background-color: var(--primary-purple);
+  transform: translateX(4px);
+}
+
+.expandBtn {
+  background: none;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  transition: transform 0.3s ease;
+  color: var(--dark-text);
+}
+
+.expandBtn.expanded {
+  transform: rotate(180deg);
+}
+
+.cardTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--dark-text);
+  margin-bottom: 0.75rem;
+  transition: color 0.3s ease;
+}
+
+.cardTitle.expanded {
+  color: var(--primary-purple);
+  font-weight: 700;
+}
+
+.cardDetails {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--medium-gray);
+}
+
+.detail {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.label {
+  font-size: 0.75rem;
+  color: #999;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.value {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--dark-text);
+}
+
+.growth {
+  color: var(--success-green);
+}
+
+.description {
+  font-size: 0.95rem;
+  color: #555;
+  line-height: 1.6;
+  margin: 0.5rem 0;
+  text-align: left;
+}
+
+.expandedContent {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--medium-gray);
+  animation: slideDown 0.3s ease;
+}
+
+.section {
+  margin-bottom: 1.5rem;
+}
+
+.sectionTitle {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--dark-text);
+  margin-bottom: 0.75rem;
+}
+
+.marketSignals {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  padding: 1rem;
+  background-color: var(--light-bg);
+  border-radius: 8px;
+}
+
+.roadmap {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.step {
+  display: flex;
+  gap: 1.25rem;
+  padding: 0.75rem 0;
+}
+
+.stepCircle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary-purple) 0%, #8b5cf6 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.95rem;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(108, 92, 231, 0.2);
+}
+
+.stepContent {
+  flex: 1;
+}
+
+.stepTitle {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--dark-text);
+  margin-bottom: 0.25rem;
+}
+
+.stepDescription {
+  font-size: 0.85rem;
+  color: #666;
+  margin-bottom: 0.5rem;
+}
+
+.stepMeta {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  font-size: 0.8rem;
+}
+
+.duration {
+  color: #999;
+}
+
+.applyBtn {
+  width: 100%;
+  padding: 1rem;
+  background: linear-gradient(135deg, var(--primary-purple) 0%, #8b5cf6 100%);
+  color: white;
+  font-weight: 700;
+  font-size: 1rem;
+  border-radius: 8px;
+  margin-top: 1.5rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 4px 12px rgba(108, 92, 231, 0.2);
+}
+
+.applyBtn:hover {
+  background: linear-gradient(135deg, #5a45d4 0%, #7c3aed 100%);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(108, 92, 231, 0.35);
+}
+
+.applyBtn:active {
+  transform: translateY(-1px);
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 1000px;
+  }
+}
+
+@media (max-width: 768px) {
+  .card {
+    padding: 1rem;
+  }
+
+  .cardDetails {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .marketSignals {
+    grid-template-columns: 1fr;
+  }
+
+  .cardHeader {
+    flex-direction: column;
+  }
+}

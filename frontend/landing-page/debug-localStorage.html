@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LocalStorage Debug - Career Sync</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+            color: #333;
+        }
+
+        .data-item {
+            background: #f5f5f5;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+
+        .data-label {
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 8px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .data-value {
+            background: white;
+            padding: 12px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+            color: #333;
+        }
+
+        .code-block {
+            background: #272822;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f5f5f5;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+
+        .btn-secondary:hover {
+            background: #efefef;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .status-good {
+            color: #10b981;
+            font-weight: 600;
+        }
+
+        .status-warning {
+            color: #f59e0b;
+            font-weight: 600;
+        }
+
+        .status-error {
+            color: #ef4444;
+            font-weight: 600;
+        }
+
+        .info-box {
+            background: #e0e7ff;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+
+        .info-box h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .info-box p {
+            color: #555;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .course-summary {
+            background: #f0f9ff;
+            border-left: 4px solid #3b82f6;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+
+        .course-summary h4 {
+            color: #1e40af;
+            margin-bottom: 8px;
+        }
+
+        .module-info {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 12px;
+            margin-left: 20px;
+            margin-top: 10px;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        .footer {
+            background: #f9fafb;
+            border-top: 1px solid #e5e7eb;
+            padding: 20px 40px;
+            text-align: center;
+            color: #666;
+            font-size: 13px;
+        }
+
+        a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 LocalStorage Debug Panel</h1>
+            <p>Inspect stored data for Career Sync course viewer</p>
+        </div>
+
+        <div class="content">
+            <div class="info-box">
+                <h3>ℹ️ What This Does</h3>
+                <p>This page displays all the data stored in your browser's localStorage that's related to Career Sync. If your course viewer isn't showing content, check the data below to see if courses and modules are properly saved.</p>
+            </div>
+
+            <div class="section">
+                <div class="section-title">⚡ Quick Actions</div>
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="refreshData()">🔄 Refresh Data</button>
+                    <button class="btn btn-secondary" onclick="exportData()">📥 Export JSON</button>
+                    <button class="btn btn-danger" onclick="clearData()">🗑️ Clear All Course Data</button>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">📋 Enrolled Courses</div>
+                <div id="courses-container">Loading...</div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">🔐 User Data</div>
+                <div id="user-data-container">Loading...</div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">💾 All localStorage Keys</div>
+                <div id="all-keys-container">Loading...</div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>💡 Open your browser's Developer Tools (F12) and go to Console tab to see detailed logging</p>
+            <p>Last updated: <span id="last-updated">-</span></p>
+        </div>
+    </div>
+
+    <script>
+        function updateLastUpdated() {
+            const now = new Date().toLocaleTimeString();
+            document.getElementById('last-updated').textContent = now;
+        }
+
+        function refreshData() {
+            displayCourses();
+            displayUserData();
+            displayAllKeys();
+            updateLastUpdated();
+        }
+
+        function displayCourses() {
+            const container = document.getElementById('courses-container');
+            const coursesData = localStorage.getItem('careersync_enrolled_courses');
+
+            if (!coursesData) {
+                container.innerHTML = '<div class="data-item"><span class="status-warning">⚠️ No courses found in localStorage</span></div>';
+                return;
+            }
+
+            try {
+                const courses = JSON.parse(coursesData);
+                let html = '';
+
+                if (!Array.isArray(courses) || courses.length === 0) {
+                    html = '<div class="data-item"><span class="status-warning">⚠️ Courses array is empty</span></div>';
+                } else {
+                    html = `<div class="data-item"><span class="status-good">✅ Found ${courses.length} course(s)</span></div>`;
+
+                    courses.forEach((course, idx) => {
+                        const moduleCount = course.modules ? course.modules.length : 0;
+                        const courseId = course._id || course.id || `course_${course.title}`;
+                        
+                        html += `
+                            <div class="course-summary">
+                                <h4>${idx + 1}. ${course.title || 'Untitled Course'}</h4>
+                                <p><strong>Course ID:</strong> <code>${courseId}</code></p>
+                                <p><strong>Modules:</strong> ${moduleCount}</p>
+                                <p><strong>Description:</strong> ${course.description ? course.description.substring(0, 100) + '...' : 'None'}</p>
+                        `;
+
+                        if (course.modules && course.modules.length > 0) {
+                            const firstModule = course.modules[0];
+                            const hasTopics = firstModule.topics && firstModule.topics.length > 0;
+                            const hasActivities = firstModule.activities && firstModule.activities.length > 0;
+                            const hasReadings = firstModule.readingMaterials && firstModule.readingMaterials.length > 0;
+                            
+                            html += `
+                                <div class="module-info">
+                                    <strong>First Module: "${firstModule.title || 'Module 1'}"</strong>
+                                    <p style="margin-top: 5px;">
+                                        ${hasTopics ? '<span class="status-good">✅ Has Topics (' + firstModule.topics.length + ')</span>' : '<span class="status-error">❌ No Topics</span>'}<br>
+                                        ${hasActivities ? '<span class="status-good">✅ Has Activities (' + firstModule.activities.length + ')</span>' : '<span class="status-warning">⚠️ No Activities</span>'}<br>
+                                        ${hasReadings ? '<span class="status-good">✅ Has Reading Materials (' + firstModule.readingMaterials.length + ')</span>' : '<span class="status-warning">⚠️ No Reading Materials</span>'}
+                                    </p>
+                                    <p style="margin-top: 8px; font-size: 11px; background: white; padding: 8px; border-radius: 3px; max-height: 200px; overflow-y: auto;">
+                                        <strong>Module Data:</strong><br>
+                                        <code>${JSON.stringify(firstModule, null, 2).substring(0, 500)}</code>
+                                    </p>
+                                </div>
+                            `;
+                        }
+
+                        html += `</div>`;
+                    });
+                }
+
+                container.innerHTML = html;
+            } catch (error) {
+                container.innerHTML = `<div class="data-item"><span class="status-error">❌ Error parsing courses: ${error.message}</span></div>`;
+            }
+        }
+
+        function displayUserData() {
+            const container = document.getElementById('user-data-container');
+            const userData = localStorage.getItem('careersync_user');
+            const token = localStorage.getItem('careersync_token');
+
+            let html = '';
+
+            if (userData) {
+                try {
+                    const user = JSON.parse(userData);
+                    html += `<div class="data-item"><span class="status-good">✅ User Data Found</span></div>`;
+                    html += `<div class="data-item">
+                        <div class="data-label">User Information</div>
+                        <div class="data-value">${JSON.stringify(user, null, 2)}</div>
+                    </div>`;
+                } catch (error) {
+                    html += `<div class="data-item"><span class="status-error">❌ Error parsing user data: ${error.message}</span></div>`;
+                }
+            } else {
+                html += `<div class="data-item"><span class="status-warning">⚠️ No user data found</span></div>`;
+            }
+
+            if (token) {
+                html += `<div class="data-item">
+                    <div class="data-label">Auth Token (First 50 chars)</div>
+                    <div class="data-value">${token.substring(0, 50)}...</div>
+                </div>`;
+            } else {
+                html += `<div class="data-item"><span class="status-warning">⚠️ No auth token found</span></div>`;
+            }
+
+            container.innerHTML = html;
+        }
+
+        function displayAllKeys() {
+            const container = document.getElementById('all-keys-container');
+            let html = '';
+
+            const careeersyncKeys = Object.keys(localStorage)
+                .filter(key => key.toLowerCase().includes('careersync') || key.toLowerCase().includes('career'));
+
+            if (careeersyncKeys.length === 0) {
+                html = '<div class="data-item"><span class="status-warning">⚠️ No Career Sync keys found</span></div>';
+            } else {
+                html = `<div class="data-item"><span class="status-good">✅ Found ${careeersyncKeys.length} Career Sync storage key(s)</span></div>`;
+
+                careeersyncKeys.forEach(key => {
+                    const value = localStorage.getItem(key);
+                    const isLarge = value && value.length > 500;
+                    const displayValue = isLarge ? value.substring(0, 500) + '...' : value;
+
+                    html += `<div class="data-item" style="margin-top: 10px;">
+                        <div class="data-label">${key}</div>
+                        <div class="data-value">${displayValue}</div>
+                        ${isLarge ? '<p style="font-size: 11px; color: #999; margin-top: 8px;">⚠️ Value truncated. Full size: ' + Math.round(value.length / 1024) + ' KB</p>' : ''}
+                    </div>`;
+                });
+            }
+
+            container.innerHTML = html;
+        }
+
+        function exportData() {
+            const careeersyncData = {};
+            Object.keys(localStorage)
+                .filter(key => key.toLowerCase().includes('careersync') || key.toLowerCase().includes('career'))
+                .forEach(key => {
+                    const value = localStorage.getItem(key);
+                    try {
+                        careeersyncData[key] = JSON.parse(value);
+                    } catch {
+                        careeersyncData[key] = value;
+                    }
+                });
+
+            const json = JSON.stringify(careeersyncData, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'careersync-debug-' + new Date().toISOString().split('T')[0] + '.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function clearData() {
+            if (confirm('⚠️ This will delete ALL Career Sync course data from localStorage. Are you sure?')) {
+                Object.keys(localStorage)
+                    .filter(key => key.toLowerCase().includes('careersync') || key.toLowerCase().includes('career'))
+                    .forEach(key => localStorage.removeItem(key));
+                
+                alert('✅ Data cleared!');
+                refreshData();
+            }
+        }
+
+        // Initialize on load
+        window.addEventListener('load', () => {
+            refreshData();
+        });
+    </script>
+</body>
+</html>

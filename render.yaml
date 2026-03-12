@@ -1,0 +1,97 @@
+services:
+  # Backend API Service
+  - type: web
+    name: careersync-backend
+    runtime: node
+    region: oregon
+    plan: free
+    buildCommand: cd backend/main-app/backend && npm install
+    startCommand: cd backend/main-app/backend && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: EMAILJS_SERVICE_ID
+        sync: false
+      - key: EMAILJS_TEMPLATE_ID
+        sync: false
+      - key: EMAILJS_PUBLIC_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: EMAILJS_PRIVATE_KEY
+        sync: false
+      - key: YOUTUBE_API_KEY
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
+
+  # Course Generation Frontend
+  - type: web
+    name: careersync-course-gen
+    runtime: node
+    region: oregon
+    plan: free
+    buildCommand: cd frontend/course-generation && npm install --include=dev && npm run build
+    startCommand: cd frontend/course-generation && npm run start -- -p $PORT
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_PUBLIC_API_URL
+        value: https://careersync-backend-oldo.onrender.com/api
+      - key: NEXT_PUBLIC_YOUTUBE_API_KEY
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: NPM_CONFIG_PRODUCTION
+        value: "false"
+
+  # Landing Page
+  - type: web
+    name: careersync-landing
+    runtime: node
+    region: oregon
+    plan: free
+    buildCommand: cd frontend/landing-page && npm install --include=dev && npm run build
+    startCommand: cd frontend/landing-page && npm run preview -- --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NPM_CONFIG_PRODUCTION
+        value: "false"
+
+  # Roadmap Frontend
+  - type: web
+    name: careersync-roadmap
+    runtime: node
+    region: oregon
+    plan: free
+    buildCommand: cd frontend/roadmap && npm install --include=dev && npm run build
+    startCommand: cd frontend/roadmap && npm run preview -- --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: VITE_API_URL
+        value: https://careersync-backend-oldo.onrender.com
+      - key: VITE_GEMINI_API_KEY
+        sync: false
+      - key: NPM_CONFIG_PRODUCTION
+        value: "false"
+  # Test Generation / Evaluator Frontend
+  - type: web
+    name: careersync-evaluator
+    runtime: node
+    region: oregon
+    plan: free
+    buildCommand: cd frontend/test-generation && npm install --include=dev && npm run build
+    startCommand: cd frontend/test-generation && npm run preview -- --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: VITE_API_URL
+        value: https://careersync-backend-oldo.onrender.com
+      - key: VITE_GEMINI_API_KEY
+        sync: false
+      - key: NPM_CONFIG_PRODUCTION
+        value: "false"

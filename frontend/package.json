@@ -1,0 +1,14 @@
+{
+  "name": "careersync-frontend",
+  "version": "1.0.0",
+  "description": "Unified frontend for Career Sync - All modules",
+  "scripts": {
+    "dev": "concurrently -n \"Landing,Courses,Roadmap,Evaluator\" -c \"cyan,blue,green,magenta\" \"cd landing-page && npm run dev\" \"cd course-generation && npm run dev\" \"cd roadmap && npm run dev\" \"cd test-generation && npm run dev\"",
+    "copy-shared": "node copy-shared-assets.js",
+    "install-all": "cd landing-page && npm install && cd ../course-generation && npm install && cd ../roadmap && npm install && cd ../test-generation && npm install",
+    "build-all": "cd landing-page && npm run build && cd ../course-generation && npm run build && cd ../roadmap && npm run build"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

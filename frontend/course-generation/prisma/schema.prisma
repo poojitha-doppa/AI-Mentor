@@ -1,0 +1,424 @@
+// This is your Prisma schema file.
+// Learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ============================================
+// USERS & AUTHENTICATION
+// ============================================
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  password_hash String?
+  role          String    @default("learner") // learner, educator, admin
+  avatar_url    String?
+  bio           String?
+  
+  // Google OAuth
+  google_id     String?   @unique
+  
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
+
+  // Relations
+  created_courses       Course[]          @relation("creator")
+  created_journeys      LearningJourney[] @relation("creator")
+  enrollments           Enrollment[]
+  progress              UserProgress[]
+  educator_application  EducatorApplication?
+
+  @@index([email])
+  @@index([role])
+}
+
+// ============================================
+// COURSES
+// ============================================
+
+model Course {
+  id              String    @id @default(cuid())
+  title           String
+  slug            String    @unique
+  description     String    @db.Text
+  topic           String    // e.g., "Python Programming"
+  
+  // Course Details
+  duration        String?   // e.g., "4 weeks"
+  difficulty      String?   // beginner, intermediate, advanced
+  prerequisites   String[]  @default([])
+  learning_objectives String[] @default([])
+  
+  // Media
+  thumbnail_url   String?
+  
+  // Creator
+  creator_id      String
+  creator         User      @relation("creator", fields: [creator_id], references: [id], onDelete: Cascade)
+  
+  // Journey (optional)
+  journey_id      String?
+  journey         LearningJourney? @relation(fields: [journey_id], references: [id], onDelete: SetNull)
+  
+  // Timestamps
+  published_date  DateTime  @default(now())
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
+
+  // Relations
+  topics          Topic[]
+  enrollments     Enrollment[]
+  progress        UserProgress[]
+
+  @@index([creator_id])
+  @@index([journey_id])
+  @@index([slug])
+  @@index([published_date])
+}
+
+// ============================================
+// TOPICS/LESSONS
+// ============================================
+
+model Topic {
+  id              String    @id @default(cuid())
+  title           String
+  description     String    @db.Text
+  content         String    @db.Text // Markdown content
+  
+  // Video
+  video_url       String?
+  video_duration  Int?      // in seconds
+  
+  // Metadata
+  duration        Int       @default(600) // in seconds
+  order           Int       // sequence in course (1, 2, 3...)
+  is_quiz         Boolean   @default(false)
+  
+  // Course
+  course_id       String
+  course          Course    @relation(fields: [course_id], references: [id], onDelete: Cascade)
+  
+  // Timestamps
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
+
+  // Relations
+  progress        UserProgress[]
+  quiz_questions  QuizQuestion[]
+
+  @@index([course_id])
+  @@index([order])
+  @@unique([course_id, order])
+}
+
+// ============================================
+// LEARNING JOURNEYS
+// ============================================
+
+model LearningJourney {
+  id              String    @id @default(cuid())
+  title           String
+  slug            String    @unique
+  description     String    @db.Text
+  
+  // Metadata
+  who_is_for      String?   @db.Text
+  who_is_not_for  String?   @db.Text
+  
+  // Media
+  thumbnail_url   String?
+  
+  // Creator
+  creator_id      String
+  creator         User      @relation("creator", fields: [creator_id], references: [id], onDelete: Cascade)
+  
+  // Timestamps
+  published_date  DateTime  @default(now())
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
+
+  // Relations
+  courses         Course[]
+  enrollments     Enrollment[]
+
+  @@index([creator_id])
+  @@index([slug])
+  @@index([published_date])
+}
+
+// ============================================
+// ENROLLMENTS
+// ============================================
+
+model Enrollment {
+  id              String    @id @default(cuid())
+  
+  // User
+  user_id         String
+  user            User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  
+  // Can enroll in Course OR Journey (not both)
+  course_id       String?
+  course          Course?   @relation(fields: [course_id], references: [id], onDelete: Cascade)
+  
+  journey_id      String?
+  journey         LearningJourney? @relation(fields: [journey_id], references: [id], onDelete: Cascade)
+  
+  // Progress
+  progress        Int       @default(0) // 0-100 percentage
+  completed       Boolean   @default(false)
+  completed_at    DateTime?
+  
+  // Timestamps
+  enrolled_at     DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
+
+  @@unique([user_id, course_id])
+  @@unique([user_id, journey_id])
+  @@index([user_id])
+  @@index([course_id])
+  @@index([journey_id])
+}
+
+// ============================================
+// USER PROGRESS
+// ============================================
+
+model UserProgress {
+  id              String    @id @default(cuid())
+  
+  // User
+  user_id         String
+  user            User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  
+  // Course & Topic
+  course_id       String
+  course          Course    @relation(fields: [course_id], references: [id], onDelete: Cascade)
+  
+  topic_id        String
+  topic           Topic     @relation(fields: [topic_id], references: [id], onDelete: Cascade)
+  
+  // Progress
+  completed       Boolean   @default(false)
+  time_spent      Int       @default(0) // in seconds
+  watch_progress  Float     @default(0) // 0-100 percentage (for videos)
+  
+  // Timestamps
+  last_accessed   DateTime  @updatedAt
+  created_at      DateTime  @default(now())
+
+  @@unique([user_id, topic_id])
+  @@index([user_id])
+  @@index([course_id])
+  @@index([topic_id])
+}
+
+// ============================================
+// QUIZZES & ASSESSMENTS
+// ============================================
+
+model QuizQuestion {
+  id              String    @id @default(cuid())
+  
+  // Topic
+  topic_id        String
+  topic           Topic     @relation(fields: [topic_id], references: [id], onDelete: Cascade)
+  
+  // Question Content
+  question        String    @db.Text
+  question_type   String    // multiple-choice, true-false, short-answer
+  
+  // Options (for multiple choice)
+  options         String[]  @default([])
+  correct_answer  String
+  explanation     String?   @db.Text
+  
+  // Metadata
+  order           Int
+  points          Int       @default(1)
+  
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
+
+  // Relations
+  responses       QuizResponse[]
+
+  @@index([topic_id])
+  @@index([order])
+}
+
+model QuizResponse {
+  id              String    @id @default(cuid())
+  
+  // User
+  user_id         String
+  
+  // Question
+  question_id     String
+  question        QuizQuestion @relation(fields: [question_id], references: [id], onDelete: Cascade)
+  
+  // Response
+  user_answer     String?   @db.Text
+  is_correct      Boolean?
+  points_earned   Int       @default(0)
+  
+  // Timestamps
+  answered_at     DateTime  @default(now())
+
+  @@unique([user_id, question_id])
+  @@index([user_id])
+  @@index([question_id])
+}
+
+// ============================================
+// EDUCATOR APPLICATIONS
+// ============================================
+
+model EducatorApplication {
+  id              String    @id @default(cuid())
+  
+  user_id         String    @unique
+  user            User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  
+  reason          String    @db.Text
+  status          String    @default("pending") // pending, approved, rejected
+  
+  submitted_at    DateTime  @default(now())
+  reviewed_at     DateTime?
+  review_notes    String?   @db.Text
+
+  @@index([status])
+}
+
+// ============================================
+// GENERATED COURSES
+// ============================================
+
+model GeneratedCourse {
+  id              String    @id @default(cuid())
+  
+  // Course Reference
+  course_id       String?
+  
+  // Generation Details
+  topic           String
+  personalization Json      // Stores the user's answers
+  
+  // Generated Content
+  title           String
+  description     String    @db.Text
+  modules         Json      // Structured course data
+  
+  // Metadata
+  generator_model String    @default("mistral-7b")
+  generation_time Int       @default(0) // in seconds
+  
+  // Timestamps
+  created_at      DateTime  @default(now())
+
+  @@index([course_id])
+  @@index([created_at])
+}
+
+// ============================================
+// RESOURCES
+// ============================================
+
+model Resource {
+  id              String    @id @default(cuid())
+  
+  course_id       String
+  course          Course    @relation(fields: [course_id], references: [id], onDelete: Cascade)
+  
+  title           String
+  description     String?   @db.Text
+  resource_type   String    // book, video, article, tool, etc.
+  url             String?
+  
+  created_at      DateTime  @default(now())
+
+  @@index([course_id])
+}
+
+// ============================================
+// COMMENTS & DISCUSSIONS
+// ============================================
+
+model Comment {
+  id              String    @id @default(cuid())
+  
+  // User
+  user_id         String
+  
+  // Target (can be Course or Topic)
+  course_id       String?
+  topic_id        String?
+  
+  // Content
+  content         String    @db.Text
+  
+  // Parent comment (for replies)
+  parent_id       String?
+  parent          Comment?  @relation("CommentReplies", fields: [parent_id], references: [id], onDelete: Cascade)
+  replies         Comment[] @relation("CommentReplies")
+  
+  // Timestamps
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
+
+  @@index([user_id])
+  @@index([course_id])
+  @@index([topic_id])
+  @@index([parent_id])
+}
+
+// ============================================
+// COURSE REVIEWS
+// ============================================
+
+model Review {
+  id              String    @id @default(cuid())
+  
+  user_id         String
+  course_id       String
+  
+  rating          Int       // 1-5
+  title           String
+  content         String    @db.Text
+  
+  helpful_count   Int       @default(0)
+  
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
+
+  @@unique([user_id, course_id])
+  @@index([course_id])
+}
+
+// ============================================
+// CERTIFICATES
+// ============================================
+
+model Certificate {
+  id              String    @id @default(cuid())
+  
+  user_id         String
+  course_id       String
+  
+  certificate_url String
+  issued_at       DateTime  @default(now())
+  
+  @@unique([user_id, course_id])
+  @@index([user_id])
+  @@index([course_id])
+}

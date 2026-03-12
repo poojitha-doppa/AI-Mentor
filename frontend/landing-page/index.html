@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Career Sync | AI-Powered Career Evolution</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%234F46E5'/%3E%3Ccircle cx='16' cy='16' r='6' fill='white'/%3E%3C/svg%3E">
+
+    <!-- CSS Stylesheets -->
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/styles/main.css">
+    <link rel="stylesheet" href="/styles/enhanced-visuals.css">
+
+    <!-- Auto-detect environment and set module URLs -->
+    <script>
+        window.getModuleUrls = function() {
+            const isProduction = window.location.hostname.includes('onrender.com');
+            if (isProduction) {
+                return {
+                    landing: 'https://careersync-landing-oldo.onrender.com',
+                    course: 'https://careersync-course-gen-oldo.onrender.com',
+                    roadmap: 'https://careersync-roadmap-oldo.onrender.com',
+                    skillEval: 'https://career-sync-skill-evalutor.onrender.com',
+                    backend: 'https://careersync-backend-oldo.onrender.com'
+                };
+            }
+            return {
+                landing: 'http://localhost:4173',
+                course: 'http://localhost:3002',
+                roadmap: 'http://localhost:5173',
+                skillEval: 'http://localhost:3001',
+                backend: 'http://localhost:5000'
+            };
+        };
+        
+        // Restore auth from URL if coming from another module
+        (function() {
+            const params = new URLSearchParams(window.location.search);
+            const token = params.get('auth_token');
+            const userStr = params.get('auth_user');
+            
+            if (token && userStr) {
+                console.log('✅ Restoring auth from URL parameters');
+                localStorage.setItem('careersync_token', token);
+                localStorage.setItem('careersync_user', userStr);
+                // Clean URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        })();
+        
+        // Restore auth from URL if coming from another app
+        (function() {
+            const params = new URLSearchParams(window.location.search);
+            const token = params.get('auth_token');
+            const userStr = params.get('auth_user');
+            
+            if (token && userStr) {
+                localStorage.setItem('careersync_token', token);
+                localStorage.setItem('careersync_user', userStr);
+                // Clean URL
+                window.history.replaceState({}, document.title, window.location.pathname + window.location.hash);
+            }
+        })();
+    </script>
+
+    <!-- Shared Header Component will be injected by main.js -->
+
+    <!-- EmailJS SDK -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script type="text/javascript">
+        (function () {
+            // Initialize EmailJS with Public Key
+            emailjs.init("FZSavRhxo_ozMjVFW");
+        })();
+    </script>
+</head>
+
+<body>
+
+    <!-- Header will be injected by header-component.js -->
+
+    <main>
+        <!-- HERO -->
+        <section class="hero relative">
+            <div class="container relative z-10">
+                <div class="hero-grid">
+                    <div class="hero-content">
+                        <div class="section-label neon-text">Next-Gen Career Intelligence</div>
+                        <h1 class="hero-title">
+                            Master Your <span class="gradient-text">Future</span><br>
+                            With AI Precision
+                        </h1>
+                        <p class="subtitle">
+                            Orchestrate your professional journey with the world's most advanced career intelligence
+                            platform.
+                        </p>
+                        <div class="flex gap-4">
+                            <button id="hero-cta-btn" class="btn btn-primary glow-effect" data-module-target="course">Start Intelligence Engine</button>
+                        </div>
+                    </div>
+
+                    <!-- 3D Animation Placeholder utilizing CSS -->
+                    <div class="hero-visual">
+                        <div class="cube-container">
+                            <div class="cube">
+                                <div class="face front">Skills</div>
+                                <div class="face back">Growth</div>
+                                <div class="face right">AI</div>
+                                <div class="face left">Career</div>
+                                <div class="face top">Path</div>
+                                <div class="face bottom">Success</div>
+                            </div>
+                        </div>
+                        <div class="floating-orb orb-1"></div>
+                        <div class="floating-orb orb-2"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- MODULE 1: COURSE GEN -->
+        <section id="course-gen" class="section relative">
+            <div class="floating-shape shape-1"></div>
+            <div class="container">
+                <div class="grid grid-2 items-center">
+                    <div class="visual-container tilt-card">
+                        <!-- Visuals unchanged... -->
+                        <div class="floating-card glass">
+                            <div class="card-header">
+                                <div class="dot red"></div>
+                                <div class="dot yellow"></div>
+                                <div class="dot green"></div>
+                            </div>
+                            <div class="code-preview">
+                                <span class="token-keyword">generate</span>(<span class="token-string">"Advanced
+                                    React"</span>);<br>
+                                <span class="token-comment">// compiling 12 modules...</span><br>
+                                <span class="token-success">✓ Video Lectures Ready</span><br>
+                                <span class="token-success">✓ Labs Configured</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="section-label">Module 01</div>
+                        <h2>AI Course Generator</h2>
+                        <p>Stop searching. Start learning. Our agents compile bespoke curriculums from the world's best
+                            resources in seconds.</p>
+                        <ul class="feature-list">
+                            <li class="feature-item">
+                                <div class="check-icon">✓</div>
+                                <span>Instant syllabus generation</span>
+                            </li>
+                            <li class="feature-item">
+                                <div class="check-icon">✓</div>
+                                <span>Curated video & reading materials</span>
+                            </li>
+                        </ul>
+                        <div class="flex gap-3" style="margin-top:1rem;">
+                            <button class="btn btn-primary" data-module-target="course">Open Course Generator</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- MODULE 2: ROADMAP -->
+        <section id="roadmap-gen" class="section bg-subtle relative overflow-hidden">
+            <div class="floating-shape shape-2"></div>
+            <div class="container">
+                <div class="grid grid-2 items-center">
+                    <div class="order-2">
+                        <div class="section-label">Module 02</div>
+                        <h2>Roadmap Engine</h2>
+                        <p>From where you are to where you want to be. Visualized. Calculated. Optimized for salary and
+                            time.</p>
+                        <ul class="feature-list">
+                            <li class="feature-item">
+                                <div class="check-icon">✓</div>
+                                <span>Role-based gap analysis</span>
+                            </li>
+                            <li class="feature-item">
+                                <div class="check-icon">✓</div>
+                                <span>Salary-optimized paths</span>
+                            </li>
+                        </ul>
+                        <div class="flex gap-3" style="margin-top:1rem;">
+                            <button class="btn btn-primary" data-module-target="roadmap">Launch Roadmap Generator</button>
+                        </div>
+                    </div>
+                    <div class="visual-container tilt-card order-1">
+                        <div class="roadmap-visual glass">
+                            <div class="node completed">
+                                <div class="node-icon">Current</div>
+                            </div>
+                            <div class="path-line active"></div>
+                            <div class="node current">
+                                <div class="node-icon">Step 1</div>
+                                <div class="pulse-ring"></div>
+                            </div>
+                            <div class="path-line dashed"></div>
+                            <div class="node future">
+                                <div class="node-icon">Goal</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- MODULE 3: EVALUATOR -->
+        <section id="skill-eval" class="section relative">
+            <div class="floating-shape shape-3"></div>
+            <div class="container">
+                <div class="grid grid-2 items-center">
+                    <div class="visual-container tilt-card">
+                        <div class="radar-scan glass">
+                            <div class="radar-line"></div>
+                            <div class="scan-dot dot-1"></div>
+                            <div class="scan-dot dot-2"></div>
+                            <div class="scan-stat">Analysis: 98%</div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="section-label">Module 03</div>
+                        <h2>Skill Evaluator</h2>
+                        <p>Don't guess. Prove it. Our AI interviews you to validate expertise and uncover hidden gaps.
+                        </p>
+                        <ul class="feature-list">
+                            <li class="feature-item">
+                                <div class="check-icon">✓</div>
+                                <span>Dynamic AI Questioning</span>
+                            </li>
+                            <li class="feature-item">
+                                <div class="check-icon">✓</div>
+                                <span>Weakness Identification</span>
+                            </li>
+                        </ul>
+                        <div class="flex gap-3" style="margin-top:1rem;">
+                            <button class="btn btn-primary" data-module-target="skillEval">Evaluate Skill</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA -->
+        <section class="section text-center relative overflow-hidden">
+            <div class="background-glow"></div>
+            <div class="container relative z-10">
+                <h2>Deploy Your Potential</h2>
+                <p style="margin: 0 auto 2rem;">Join the intelligence network today.</p>
+                <button class="btn btn-primary glow-effect" onclick="window.location.href='/auth.html'">Access
+                    Platform</button>
+            </div>
+        </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer-premium">
+        <div class="container">
+            <div class="footer-top grid grid-4">
+                <div class="footer-brand-col">
+                    <div class="brand" style="margin-bottom:1.5rem; color: white;">
+                        <div class="brand-icon"></div>
+                        Career Sync
+                    </div>
+                    <p class="text-sm text-tertiary">
+                        Engineered for the ambitious. The world's first AI-powered career orchestration platform.
+                    </p>
+                    <div class="social-links">
+                        <a href="#" class="social-icon">𝕏</a>
+                        <a href="#" class="social-icon">In</a>
+                        <a href="#" class="social-icon">Gh</a>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="footer-heading">Product</h4>
+                    <ul class="footer-links">
+                        <li><a href="#" data-module-target="course">Course Generator</a></li>
+                        <li><a href="#" data-module-target="roadmap">Roadmap Engine</a></li>
+                        <li><a href="#" data-module-target="skillEval">Skill Evaluator</a></li>
+                        <li><a href="#">Enterprise</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="footer-heading">Resources</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">Documentation</a></li>
+                        <li><a href="#">API Reference</a></li>
+                        <li><a href="#">Blog</a></li>
+                        <li><a href="#">Community</a></li>
+                    </ul>
+                </div>
+
+                <div class="newsletter-col">
+                    <h4 class="footer-heading">Stay Ahead</h4>
+                    <p class="text-xs text-tertiary" style="margin-bottom: 1rem;">
+                        Join our intelligence network. No spam, just signals.
+                    </p>
+                    <form id="newsletter-form" class="newsletter-form">
+                        <input type="email" id="newsletter-email" placeholder="enter@email.com" class="newsletter-input"
+                            required>
+                        <button type="submit" class="newsletter-btn">→</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <div class="text-xs text-tertiary">
+                    © 2026 Career Sync Inc. All rights reserved.
+                </div>
+                <div class="flex gap-4 text-xs text-tertiary">
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Service</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- MAIN SCRIPT -->
+    <script type="module" src="/main.js"></script>
+    <script src="/shared-header.js"></script>
+    <script>
+        // Initialize authentication check on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuthenticationStatus();
+            
+            // Check auth status every 2 seconds
+            setInterval(checkAuthenticationStatus, 2000);
+        });
+
+        function checkAuthenticationStatus() {
+            const user = localStorage.getItem('careersync_user');
+            const token = localStorage.getItem('careersync_token');
+            const authContainer = document.querySelector('.careersync-nav-auth');
+            
+            if (!authContainer) return;
+
+            if (user && token) {
+                try {
+                    const userData = JSON.parse(user);
+                    const displayName = userData.name || userData.full_name || userData.email?.split('@')[0] || 'User';
+                    const initials = displayName.charAt(0).toUpperCase();
+                    const profileUrl = '/profile.html';
+                    
+                    authContainer.innerHTML = `
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <a href="${profileUrl}" onclick="saveUserProfileData()" style="color: var(--text-secondary); font-size: 0.875rem; text-decoration: none; display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 8px; transition: background 0.2s;" onmouseover="this.style.background='rgba(248, 250, 252, 1)'" onmouseout="this.style.background='transparent'">
+                                <span style="display: inline-block; width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%); color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 15px; box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);">
+                                    ${initials}
+                                </span>
+                                <span style="font-weight: 500;">${displayName}</span>
+                            </a>
+                            <button onclick="handleLogout()" class="careersync-btn careersync-btn-danger">
+                                Sign Out
+                            </button>
+                        </div>
+                    `;
+                } catch (e) {
+                    console.error('Error parsing user data:', e);
+                    showSignInButton(authContainer);
+                }
+            } else {
+                showSignInButton(authContainer);
+            }
+        }
+
+        function showSignInButton(container) {
+            container.innerHTML = `
+                <a href="/auth.html" class="careersync-btn careersync-btn-primary">
+                    Sign In
+                </a>
+            `;
+        }
+
+        function saveUserProfileData() {
+            const user = localStorage.getItem('careersync_user');
+            if (user) {
+                try {
+                    const userData = JSON.parse(user);
+                    const profileData = {
+                        ...userData,
+                        lastAccessed: new Date().toISOString(),
+                        visitCount: (parseInt(localStorage.getItem('careersync_profile_visits') || '0') + 1)
+                    };
+                    localStorage.setItem('careersync_profile_data', JSON.stringify(profileData));
+                    localStorage.setItem('careersync_profile_visits', profileData.visitCount.toString());
+                } catch (e) {
+                    console.error('Error saving profile data:', e);
+                }
+            }
+        }
+
+        function handleLogout() {
+            localStorage.removeItem('careersync_user');
+            localStorage.removeItem('careersync_token');
+            localStorage.removeItem('careersync_auth');
+            localStorage.removeItem('careersync_profile_data');
+            window.location.href = '/auth.html';
+        }
+    </script>
+
+    <!-- Newsletter Logic -->
+    <script>
+        document.getElementById('newsletter-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const email = document.getElementById('newsletter-email').value;
+            const btn = this.querySelector('button');
+
+            if (email) {
+                btn.innerHTML = '...';
+
+                const serviceID = 'service_itdedgy';
+                const templateID = 'template_qqg9udy';
+
+                emailjs.send(serviceID, templateID, { to_email: email, message: 'New Newsletter Subscriber' })
+                    .then(() => {
+                        btn.innerHTML = '✓';
+                        btn.style.background = '#10B981'; // Success Green
+                        setTimeout(() => {
+                            btn.innerHTML = '→';
+                            btn.style.background = '';
+                            document.getElementById('newsletter-email').value = '';
+                        }, 3000);
+                    })
+                    .catch((err) => {
+                        console.error('Newsletter failed:', err);
+                        btn.innerHTML = '✕';
+                        btn.style.background = '#EF4444'; // Error Red
+                    });
+            }
+        });
+    </script>
+</body>
+
+<script type="module" src="/main.js"></script>
+</body>
+
+</html>

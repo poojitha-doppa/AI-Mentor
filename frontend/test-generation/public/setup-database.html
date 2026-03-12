@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database Setup - Knowledge Assessment Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #000000 0%, #333333 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+            color: #fff;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+        h1 {
+            color: #000;
+            margin-bottom: 10px;
+        }
+        p {
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        .step {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #000;
+        }
+        .step h3 {
+            color: #000;
+            margin-bottom: 10px;
+        }
+        .step p {
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        .sql-code {
+            background: #1a1a1a;
+            color: #00ff00;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.5;
+            margin: 15px 0;
+            position: relative;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #000;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .copy-btn:hover {
+            background: #333;
+        }
+        .copy-btn:active {
+            background: #555;
+        }
+        .success-msg {
+            background: #d4edda;
+            color: #155724;
+            padding: 12px;
+            border-radius: 5px;
+            margin: 10px 0;
+            display: none;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 20px;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        .link {
+            color: #000;
+            font-weight: bold;
+            text-decoration: none;
+        }
+        .link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📚 Database Setup</h1>
+        <p>Follow these steps to set up your Supabase database tables for the Knowledge Assessment Platform.</p>
+
+        <div class="step">
+            <h3>Step 1: Open Supabase SQL Editor</h3>
+            <p>Go to your Supabase project dashboard and click on "SQL Editor" in the left sidebar.</p>
+            <a href="https://supabase.com/dashboard/project/ynyjhfldcjwsgfmhrbqy/sql" target="_blank" class="link">
+                🔗 Open Supabase SQL Editor
+            </a>
+        </div>
+
+        <div class="step">
+            <h3>Step 2: Copy the SQL Code</h3>
+            <p>Click the "Copy SQL" button below to copy the database setup script.</p>
+            <div class="sql-code" id="sqlCode">-- Skills Table
+CREATE TABLE IF NOT EXISTS skills (
+  id BIGSERIAL PRIMARY KEY,
+  skill_name TEXT NOT NULL UNIQUE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Questions Table
+CREATE TABLE IF NOT EXISTS questions (
+  id BIGSERIAL PRIMARY KEY,
+  skill_id BIGINT REFERENCES skills(id) ON DELETE CASCADE,
+  level TEXT NOT NULL,
+  main_topic TEXT,
+  sub_topic TEXT,
+  topic TEXT,
+  question TEXT NOT NULL,
+  options JSONB NOT NULL,
+  correct_answer TEXT NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Test Attempts Table
+CREATE TABLE IF NOT EXISTS test_attempts (
+  id BIGSERIAL PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  skill_id BIGINT REFERENCES skills(id) ON DELETE CASCADE,
+  level TEXT NOT NULL,
+  status TEXT DEFAULT 'in-progress',
+  score NUMERIC(5,2),
+  answers JSONB,
+  started_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  completed_at TIMESTAMP WITH TIME ZONE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Indexes for better performance
+CREATE INDEX IF NOT EXISTS idx_questions_skill_level ON questions(skill_id, level);
+CREATE INDEX IF NOT EXISTS idx_test_attempts_user ON test_attempts(user_id);
+CREATE INDEX IF NOT EXISTS idx_test_attempts_skill ON test_attempts(skill_id);
+<button class="copy-btn" onclick="copySQL()">📋 Copy SQL</button>
+            </div>
+            <div class="success-msg" id="successMsg">✅ SQL copied to clipboard!</div>
+        </div>
+
+        <div class="step">
+            <h3>Step 3: Run the SQL</h3>
+            <p>1. Click "New query" in the SQL Editor</p>
+            <p>2. Paste the copied SQL code</p>
+            <p>3. Click "Run" or press Ctrl+Enter</p>
+            <p>4. You should see "Success. No rows returned"</p>
+        </div>
+
+        <div class="step">
+            <h3>Step 4: Return to Your App</h3>
+            <p>Once the tables are created successfully, go back to your application.</p>
+            <a href="http://localhost:3000" class="btn-primary">🚀 Go to Application</a>
+        </div>
+    </div>
+
+    <script>
+        function copySQL() {
+            const sqlText = document.getElementById('sqlCode').innerText.replace('📋 Copy SQL', '').trim();
+            navigator.clipboard.writeText(sqlText).then(() => {
+                const successMsg = document.getElementById('successMsg');
+                successMsg.style.display = 'block';
+                setTimeout(() => {
+                    successMsg.style.display = 'none';
+                }, 3000);
+            });
+        }
+    </script>
+</body>
+</html>

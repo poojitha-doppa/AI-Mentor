@@ -1,0 +1,28 @@
+.banner {
+  background-color: #E3F2FD;
+  border-left: 4px solid var(--primary-purple);
+  padding: 1rem;
+  border-radius: 6px;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  color: var(--primary-purple);
+  font-size: 0.95rem;
+  margin-top: 1.5rem;
+}
+
+.banner svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.banner p {
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .banner {
+    font-size: 0.9rem;
+    padding: 0.75rem;
+  }
+}

@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>careersync | Skill Evaluator</title>
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        // Auto-update URLs based on environment (localhost vs Render)
+        window.getModuleUrls = function() {
+            const isProduction = window.location.hostname.includes('onrender.com');
+            if (isProduction) {
+                return {
+                    landing: 'https://careersync-landing-oldo.onrender.com',
+                    course: 'https://careersync-course-gen-oldo.onrender.com',
+                    roadmap: 'https://careersync-roadmap-oldo.onrender.com',
+                    skillEval: 'https://career-sync-skill-evalutor.onrender.com',
+                    backend: 'https://careersync-backend-oldo.onrender.com'
+                };
+            }
+            return {
+                landing: 'http://localhost:4173',
+                course: 'http://localhost:3002',
+                roadmap: 'http://localhost:5173',
+                skillEval: 'http://localhost:3001',
+                backend: 'http://localhost:5000'
+            };
+        };
+        
+        // Restore auth from URL if coming from another app
+        (function() {
+            const params = new URLSearchParams(window.location.search);
+            const token = params.get('auth_token');
+            const userStr = params.get('auth_user');
+            
+            if (token && userStr) {
+                console.log('✅ Restoring auth from URL parameters');
+                localStorage.setItem('careersync_token', token);
+                localStorage.setItem('careersync_user', userStr);
+                // Clean URL
+                window.history.replaceState({}, document.title, window.location.pathname + window.location.hash);
+            } else {
+                // Check if auth already exists in localStorage
+                const existingToken = localStorage.getItem('careersync_token');
+                const existingUser = localStorage.getItem('careersync_user');
+                if (existingToken && existingUser) {
+                    console.log('✅ Auth found in localStorage');
+                } else {
+                    console.log('⚠️ No authentication found');
+                }
+            }
+        })();
+    </script>
+</head>
+<body>
+    <!-- Shared Header Component -->
+    <div id="app-header"></div>
+    <script src="header.js"></script>
+
+    <main class="main-content">
+    <div class="container">
+        <!-- Header Section -->
+        <header class="page-header">
+            <h1>Skill Evaluator</h1>
+            <p class="subtitle">Test your knowledge with AI-generated questions</p>
+        </header>
+
+        <!-- Setup Section -->
+        <section id="setupSection" class="section">
+            <div class="input-group">
+                <label for="courseInput">Enter Topic Name</label>
+                <input 
+                    type="text" 
+                    id="courseInput" 
+                    placeholder="e.g., Python, Java, Machine Learning, DBMS..." 
+                    autocomplete="off"
+                >
+            </div>
+
+            <div class="difficulty-group">
+                <label>Select Difficulty Level</label>
+                <div class="button-group">
+                    <button type="button" class="difficulty-btn" data-level="easy" onclick="handleDifficultyClick('easy')">
+                        <span class="emoji">🟢</span>
+                        Easy
+                    </button>
+                    <button type="button" class="difficulty-btn" data-level="medium" onclick="handleDifficultyClick('medium')">
+                        <span class="emoji">🟡</span>
+                        Medium
+                    </button>
+                    <button type="button" class="difficulty-btn" data-level="hard" onclick="handleDifficultyClick('hard')">
+                        <span class="emoji">🔴</span>
+                        Hard
+                    </button>
+                </div>
+            </div>
+
+            <button id="attemptTestBtn" class="primary-btn" disabled>
+                Attempt Test
+            </button>
+        </section>
+
+        <!-- Loading Section -->
+        <section id="loadingSection" class="section hidden">
+            <div class="loader"></div>
+            <p class="loading-text">Generating your personalized test questions...</p>
+            <p class="loading-subtext">This may take a few moments</p>
+        </section>
+
+        <!-- Test Section -->
+        <section id="testSection" class="section hidden">
+            <div class="test-header">
+                <h2 id="testTitle">Test Questions</h2>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressBar"></div>
+                </div>
+                <p class="progress-text" id="progressText">Answered: 0/0</p>
+            </div>
+
+            <div id="questionsContainer"></div>
+
+            <button id="submitTestBtn" class="primary-btn" disabled>
+                Submit Test
+            </button>
+        </section>
+
+        <!-- Results Section -->
+        <section id="resultsSection" class="section hidden">
+            <div class="results-header">
+                <h2>📊 Test Results</h2>
+                <div class="score-card">
+                    <div class="score-circle">
+                        <div class="score-value" id="scoreValue">0/20</div>
+                        <div class="score-percentage" id="scorePercentage">0%</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="results-details" id="resultsDetails"></div>
+
+            <div class="analysis-section" id="analysisSection"></div>
+
+            <button id="retakeTestBtn" class="primary-btn">
+                Take Another Test
+            </button>
+        </section>
+    </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer-premium">
+        <div class="container">
+            <div class="footer-top grid grid-4">
+                <div class="footer-brand-col">
+                    <div class="brand" style="margin-bottom:1.5rem; color: white;">
+                        <div class="brand-icon"></div>
+                        Career Sync
+                    </div>
+                    <p class="text-sm text-tertiary">
+                        Engineered for the ambitious. The world's first AI-powered career orchestration platform.
+                    </p>
+                    <div class="social-links">
+                        <a href="#" class="social-icon">𝕏</a>
+                        <a href="#" class="social-icon">In</a>
+                        <a href="#" class="social-icon">Gh</a>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="footer-heading">Product</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">Course Generator</a></li>
+                        <li><a href="#">Roadmap Engine</a></li>
+                        <li><a href="#">Skill Evaluator</a></li>
+                        <li><a href="#">Enterprise</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="footer-heading">Resources</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">Documentation</a></li>
+                        <li><a href="#">API Reference</a></li>
+                        <li><a href="#">Blog</a></li>
+                        <li><a href="#">Community</a></li>
+                    </ul>
+                </div>
+
+                <div class="newsletter-col">
+                    <h4 class="footer-heading">Stay Ahead</h4>
+                    <p class="text-xs text-tertiary" style="margin-bottom: 1rem;">
+                        Join our intelligence network. No spam, just signals.
+                    </p>
+                    <form id="newsletter-form" class="newsletter-form">
+                        <input type="email" id="newsletter-email" placeholder="enter@email.com" class="newsletter-input"
+                            required>
+                        <button type="submit" class="newsletter-btn">→</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <div class="text-xs text-tertiary">
+                    © 2026 Career Sync Inc. All rights reserved.
+                </div>
+                <div class="flex gap-4 text-xs text-tertiary">
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Service</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Update auth UI for evaluator page
+        function updateEvaluatorAuthUI() {
+            const authContainer = document.getElementById('careersync-nav-auth');
+            if (!authContainer) return;
+
+            const user = localStorage.getItem('careersync_user');
+            const token = localStorage.getItem('careersync_token');
+
+            if (user && token) {
+                try {
+                    const userData = JSON.parse(user);
+                    authContainer.innerHTML = `
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <span class="careersync-user-info">
+                                👤 ${userData.full_name || userData.email || 'User'}
+                            </span>
+                            <button id="careersync-logout-btn" class="careersync-btn careersync-btn-danger">
+                                Sign Out
+                            </button>
+                        </div>
+                    `;
+
+                    const logoutBtn = document.getElementById('careersync-logout-btn');
+                    if (logoutBtn) {
+                        logoutBtn.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            localStorage.removeItem('careersync_user');
+                            localStorage.removeItem('careersync_token');
+                            localStorage.removeItem('careersync_auth');
+                            window.location.href = window.getModuleUrls().landing + '/auth.html';
+                        });
+                    }
+                } catch (e) {
+                    console.error('Invalid user data:', e);
+                    localStorage.removeItem('careersync_user');
+                    localStorage.removeItem('careersync_token');
+                    localStorage.removeItem('careersync_auth');
+                }
+            } else {
+                // Don't show Sign In button, leave empty
+                authContainer.innerHTML = '';
+            }
+        }
+
+        // Check auth on load and every 2 seconds
+        document.addEventListener('DOMContentLoaded', updateEvaluatorAuthUI);
+        setInterval(updateEvaluatorAuthUI, 2000);
+
+        // Also update auth UI when storage changes from other tabs
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'careersync_user' || e.key === 'careersync_token') {
+                updateEvaluatorAuthUI();
+            }
+        });
+    </script>
+    <script src="script.js"></script>
+    <script>
+        // Initialize auth check for test page
+        document.addEventListener('DOMContentLoaded', function() {
+            checkEvaluatorAuth();
+            
+            // Check auth every 1 second
+            setInterval(checkEvaluatorAuth, 1000);
+
+            // Listen for storage changes
+            window.addEventListener('storage', function(e) {
+                if (e.key === 'careersync_user' || e.key === 'careersync_token') {
+                    checkEvaluatorAuth();
+                }
+            });
+        });
+
+        function checkEvaluatorAuth() {
+            const user = localStorage.getItem('careersync_user');
+            const token = localStorage.getItem('careersync_token');
+            
+            if (user && token) {
+                console.log('User authenticated on test page');
+                updateAuthUI(JSON.parse(user));
+            } else {
+                updateAuthUI(null);
+            }
+        }
+
+        function updateAuthUI(user) {
+            const authContainer = document.getElementById('careersync-nav-auth');
+            if (!authContainer) return;
+
+            if (user) {
+                const displayName = user.name || user.full_name || user.username || user.email?.split('@')[0] || 'User';
+                const initials = displayName.charAt(0).toUpperCase();
+                
+                authContainer.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <a href="${window.getModuleUrls().landing}/profile.html" onclick="saveUserData()" style="color: var(--text-secondary); font-size: 0.875rem; text-decoration: none; display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 8px; transition: background 0.2s;" onmouseover="this.style.background='#F8FAFC'" onmouseout="this.style.background='transparent'">
+                            <span style="display: inline-block; width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%); color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 15px; box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);">
+                                ${initials}
+                            </span>
+                            <span style="font-weight: 500;">${displayName}</span>
+                        </a>
+                        <button onclick="handleLogout()" class="careersync-btn careersync-btn-danger">
+                            Sign Out
+                        </button>
+                    </div>
+                `;
+            } else {
+                // Don't show Sign In button, leave empty
+                authContainer.innerHTML = '';
+            }
+        }
+
+        function saveUserData() {
+            const user = localStorage.getItem('careersync_user');
+            if (user) {
+                try {
+                    const userData = JSON.parse(user);
+                    const profileData = {
+                        ...userData,
+                        lastAccessed: new Date().toISOString(),
+                        visitCount: (parseInt(localStorage.getItem('careersync_profile_visits') || '0') + 1)
+                    };
+                    localStorage.setItem('careersync_profile_data', JSON.stringify(profileData));
+                    localStorage.setItem('careersync_profile_visits', profileData.visitCount.toString());
+                } catch (e) {
+                    console.error('Error saving profile data:', e);
+                }
+            }
+        }
+
+        function handleLogout() {
+            localStorage.removeItem('careersync_user');
+            localStorage.removeItem('careersync_token');
+            localStorage.removeItem('careersync_auth');
+            localStorage.removeItem('careersync_profile_data');
+            window.location.href = window.getModuleUrls().landing + '/auth.html';
+        }
+    </script>
+</body>
+</html>
+

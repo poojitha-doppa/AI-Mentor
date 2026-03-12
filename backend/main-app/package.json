@@ -1,0 +1,30 @@
+{
+  "name": "skillroute-ai",
+  "version": "1.0.0",
+  "description": "SkillRoute AI - Career Intelligence Platform",
+  "private": true,
+  "scripts": {
+    "dev": "node backend/server.js",
+    "start": "node backend/server.js"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "engines": {
+    "node": "16.x || 18.x || 20.x"
+  },
+  "keywords": [
+    "AI",
+    "Career",
+    "Education",
+    "Course Generator",
+    "Skill Assessment"
+  ],
+  "author": "SkillRoute AI",
+  "license": "MIT",
+  "dependencies": {
+    "bullmq": "^5.69.3",
+    "ioredis": "^5.9.3",
+    "openai": "^6.22.0"
+  }
+}

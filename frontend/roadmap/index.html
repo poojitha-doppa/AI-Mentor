@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>careersync | Roadmap Generator</title>
+    <script>
+      // Auto-update URLs based on environment (localhost vs Render)
+      window.getModuleUrls = function() {
+        const isProduction = window.location.hostname.includes('onrender.com');
+        if (isProduction) {
+          return {
+            landing: 'https://careersync-landing-oldo.onrender.com',
+            course: 'https://careersync-course-gen-oldo.onrender.com',
+            roadmap: 'https://careersync-roadmap-oldo.onrender.com',
+            skillEval: 'https://career-sync-skill-evalutor.onrender.com',
+            backend: 'https://careersync-backend-oldo.onrender.com'
+          };
+        }
+        return {
+          landing: 'http://localhost:4173',
+          course: 'http://localhost:3002',
+          roadmap: 'http://localhost:5173',
+          skillEval: 'http://localhost:3001',
+          backend: 'http://localhost:5000'
+        };
+      };
+      
+      // Restore auth from URL if coming from another module
+      (function() {
+        const params = new URLSearchParams(window.location.search);
+        const token = params.get('auth_token');
+        const userStr = params.get('auth_user');
+        
+        if (token && userStr) {
+          console.log('✅ Restoring auth from URL parameters');
+          localStorage.setItem('careersync_token', token);
+          localStorage.setItem('careersync_user', userStr);
+          // Clean URL
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+      })();
+      
+      // Restore auth from URL if coming from another app
+      (function() {
+        const params = new URLSearchParams(window.location.search);
+        const token = params.get('auth_token');
+        const userStr = params.get('auth_user');
+        
+        if (token && userStr) {
+          localStorage.setItem('careersync_token', token);
+          localStorage.setItem('careersync_user', userStr);
+          // Clean URL
+          window.history.replaceState({}, document.title, window.location.pathname + window.location.hash);
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <!-- Shared Header Component - Injected at body start -->
+    <div id="app-header"></div>
+    <script type="module" src="/shared/header-component.js"></script>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+

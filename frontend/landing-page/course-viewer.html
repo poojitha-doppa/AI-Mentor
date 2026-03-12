@@ -1,0 +1,1238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Viewer | careersync</title>
+    <link rel="icon" type="image/svg+xml"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%234F46E5'/%3E%3Ccircle cx='16' cy='16' r='6' fill='white'/%3E%3C/svg%3E">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --brand-primary: #4F46E5;
+            --brand-secondary: #7C3AED;
+            --success-color: #10B981;
+            --text-primary: #0F172A;
+            --text-secondary: #475569;
+            --text-tertiary: #94A3B8;
+            --bg-light: #FFFFFF;
+            --border-light: #E2E8F0;
+            --sidebar-width: 320px;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #F8FAFC;
+            color: var(--text-primary);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar - Modules List */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: white;
+            border-right: 1px solid var(--border-light);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-light);
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 10;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            margin-bottom: 12px;
+            transition: color 0.2s;
+        }
+
+        .back-button:hover {
+            color: var(--brand-primary);
+        }
+
+        .course-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .course-progress {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .progress-bar-mini {
+            flex: 1;
+            height: 6px;
+            background: #E2E8F0;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill-mini {
+            height: 100%;
+            background: var(--brand-primary);
+            transition: width 0.3s ease;
+        }
+
+        .modules-list {
+            padding: 12px;
+        }
+
+        .module-item {
+            padding: 16px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .module-item:hover {
+            background: #F8F9FF;
+            border-color: var(--brand-primary);
+        }
+
+        .module-item.active {
+            background: #F0F0FF;
+            border-color: var(--brand-primary);
+        }
+
+        .module-item.completed {
+            border-color: var(--success-color);
+            background: #F0FDF4;
+        }
+
+        .module-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .module-number {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--border-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .module-item.active .module-number {
+            background: var(--brand-primary);
+            color: white;
+        }
+
+        .module-item.completed .module-number {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .module-title {
+            flex: 1;
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+
+        .module-meta {
+            font-size: 12px;
+            color: var(--text-tertiary);
+            margin-left: 44px;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .content-header {
+            padding: 24px 32px;
+            background: white;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .content-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .content-meta {
+            display: flex;
+            gap: 16px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .content-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 32px;
+        }
+
+        .module-description {
+            font-size: 16px;
+            line-height: 1.6;
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+        }
+
+        .topics-section {
+            margin-bottom: 32px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+        }
+
+        .topic-item {
+            padding: 16px 20px;
+            background: white;
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            margin-bottom: 12px;
+            transition: all 0.2s;
+        }
+
+        .topic-item:hover {
+            border-color: var(--brand-primary);
+            background: #F8F9FF;
+        }
+
+        .topic-item.completed {
+            border-color: var(--success-color);
+            background: #F0FDF4;
+        }
+
+        .topic-item-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            margin-bottom: 8px;
+        }
+
+        .topic-checkbox {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            accent-color: var(--brand-primary);
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .topic-content {
+            flex: 1;
+        }
+
+        .topic-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+            font-size: 15px;
+        }
+
+        .topic-item.completed .topic-title {
+            color: var(--success-color);
+        }
+
+        .topic-description {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-top: 8px;
+        }
+
+        .topic-duration {
+            font-size: 13px;
+            color: var(--text-tertiary);
+        }
+
+        .module-content {
+            background: white;
+            padding: 24px;
+            border-radius: 8px;
+            border: 1px solid var(--border-light);
+            margin-bottom: 24px;
+        }
+
+        .module-content h3 {
+            color: var(--text-primary);
+            margin-bottom: 12px;
+            font-size: 18px;
+        }
+
+        .module-content p {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+
+        .module-content ul, .module-content ol {
+            margin-left: 20px;
+            margin-bottom: 12px;
+            color: var(--text-secondary);
+        }
+
+        .module-content li {
+            margin-bottom: 6px;
+            line-height: 1.5;
+        }
+
+        .reading-materials {
+            margin-top: 24px;
+        }
+
+        .reading-item {
+            padding: 12px 16px;
+            background: #F0F9FF;
+            border-left: 3px solid #3B82F6;
+            border-radius: 4px;
+            margin-bottom: 8px;
+        }
+
+        .reading-item-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .reading-item-meta {
+            font-size: 13px;
+            color: var(--text-tertiary);
+        }
+
+        .reading-item-link {
+            color: var(--brand-primary);
+            text-decoration: none;
+            font-size: 13px;
+            margin-top: 4px;
+            display: inline-block;
+        }
+
+        .reading-item-link:hover {
+            text-decoration: underline;
+        }
+
+        .activities-section {
+            margin-bottom: 32px;
+        }
+
+        .activity-item {
+            padding: 12px 16px;
+            background: #FFFBEB;
+            border-left: 3px solid #F59E0B;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .content-footer {
+            padding: 20px 32px;
+            background: white;
+            border-top: 1px solid var(--border-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: var(--brand-primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--brand-secondary);
+        }
+
+        .btn-secondary {
+            background: #F1F5F9;
+            color: var(--text-secondary);
+        }
+
+        .btn-secondary:hover {
+            background: #E2E8F0;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-tertiary);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <a href="profile.html" class="back-button">← Back to Profile</a>
+            <div class="course-title" id="sidebar-course-title">Loading...</div>
+            <div class="course-progress">
+                <div class="progress-bar-mini">
+                    <div class="progress-fill-mini" id="sidebar-progress-fill" style="width: 0%"></div>
+                </div>
+                <span id="sidebar-progress-text">0%</span>
+            </div>
+        </div>
+        <div class="modules-list" id="modules-list"></div>
+    </div>
+
+    <div class="main-content">
+        <div class="content-header">
+            <div class="content-title" id="content-title">Select a module</div>
+            <div class="content-meta" id="content-meta"></div>
+        </div>
+        <div class="content-body" id="content-body">
+            <div class="empty-state">
+                <h3>👈 Select a module from the sidebar to begin</h3>
+            </div>
+        </div>
+        <div class="content-footer">
+            <button class="btn btn-secondary" id="prev-btn" onclick="navigateToPrevious()" disabled>
+                ← Previous Module
+            </button>
+            <button class="btn btn-primary" id="next-btn" onclick="navigateToNext()" disabled>
+                Next Module →
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let currentCourse = null;
+        let currentModuleIndex = 0;
+
+        // Validation function to check data integrity
+        function validateCourseData(course) {
+            console.log('\n=== VALIDATING COURSE DATA ===');
+            const issues = [];
+
+            if (!course) {
+                issues.push('❌ Course object is null or undefined');
+                return issues;
+            }
+
+            if (!course.title) {
+                issues.push('❌ Course missing title');
+            } else {
+                console.log('✅ Course title:', course.title);
+            }
+
+            if (!course.modules || course.modules.length === 0) {
+                issues.push('❌ Course has no modules');
+            } else {
+                console.log('✅ Course has', course.modules.length, 'modules');
+                
+                // Check first module
+                const firstModule = course.modules[0];
+                if (firstModule) {
+                    console.log(`\n📋 First Module: "${firstModule.title || 'Untitled'}"`);
+                    
+                    if (!firstModule.topics || firstModule.topics.length === 0) {
+                        console.warn('⚠️ First module has no topics');
+                    } else {
+                        console.log('✅ First module has', firstModule.topics.length, 'topics');
+                    }
+                    
+                    if (!firstModule.activities || firstModule.activities.length === 0) {
+                        console.warn('⚠️ First module has no activities');
+                    } else {
+                        console.log('✅ First module has', firstModule.activities.length, 'activities');
+                    }
+                    
+                    if (!firstModule.readingMaterials || firstModule.readingMaterials.length === 0) {
+                        console.warn('⚠️ First module has no reading materials');
+                    } else {
+                        console.log('✅ First module has', firstModule.readingMaterials.length, 'reading materials');
+                    }
+                }
+            }
+
+            if (issues.length === 0) {
+                console.log('\n✅ Course data validation PASSED');
+            } else {
+                console.log('\n❌ Course data validation FAILED:');
+                issues.forEach(issue => console.log('  ' + issue));
+            }
+
+            return issues;
+        }
+
+        // Initialize course on page load
+        async function initializeCourse() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const courseId = urlParams.get('courseId');
+
+            console.log('=== LOADING COURSE DATA ===');
+            console.log('Course ID from URL:', courseId);
+
+            if (!courseId) {
+                alert('No course selected. Redirecting to profile...');
+                window.location.href = 'profile.html';
+                return;
+            }
+
+            // Try multiple sources to get courses
+            let courses = [];
+            
+            // 0. Check if we have current course data passed from profile
+            const currentCourseData = localStorage.getItem('careersync_current_course_data');
+            if (currentCourseData) {
+                try {
+                    const courseData = JSON.parse(currentCourseData);
+                    console.log('✅ Found current course data passed from profile:', courseData);
+                    courses.push(courseData);
+                } catch (e) {
+                    console.error('Error parsing current course data:', e);
+                }
+            }
+            
+            // 1. Try localStorage first
+            const localCourses = localStorage.getItem('careersync_enrolled_courses');
+            if (localCourses) {
+                try {
+                    const enrolledCourses = JSON.parse(localCourses);
+                    console.log('✅ Found courses in localStorage:', enrolledCourses.length);
+                    // Merge with any existing courses (avoid duplicates)
+                    enrolledCourses.forEach(course => {
+                        if (!courses.find(c => (c.id || c._id) === (course.id || course._id))) {
+                            courses.push(course);
+                        }
+                    });
+                } catch (e) {
+                    console.error('Error parsing localStorage courses:', e);
+                }
+            }
+
+            // 2. If no courses in localStorage, try fetching from backend
+            if (courses.length === 0) {
+                console.log('📡 No localStorage courses, fetching from backend...');
+                try {
+                    const user = localStorage.getItem('careersync_user');
+                    const token = localStorage.getItem('careersync_token');
+                    
+                    if (user && token) {
+                        const userData = JSON.parse(user);
+                        const userId = userData.id || userData._id || userData.user_id;
+                        
+                        const response = await fetch(`http://localhost:5000/api/profile/${userId}`, {
+                            credentials: 'include',
+                            headers: {
+                                'Authorization': `Bearer ${token}`,
+                                'Content-Type': 'application/json'
+                            }
+                        });
+
+                        if (response.ok) {
+                            const data = await response.json();
+                            console.log('Backend response:', data);
+                            if (data.success && data.profile && data.profile.courses) {
+                                courses = data.profile.courses;
+                                console.log('✅ Fetched', courses.length, 'courses from backend');
+                                // Save to localStorage for future use
+                                localStorage.setItem('careersync_enrolled_courses', JSON.stringify(courses));
+                            }
+                        }
+                    }
+                } catch (err) {
+                    console.error('Error fetching courses from backend:', err);
+                }
+            }
+
+            console.log('All available courses:', courses);
+            console.log('Looking for courseId:', courseId);
+
+            // Find the course by ID - try multiple ID fields
+            currentCourse = courses.find(c => {
+                const cId = c._id || c.id || `course_${c.title}`;
+                console.log('Comparing:', cId, '===', courseId, '?', cId === courseId);
+                return cId === courseId;
+            });
+
+            console.log('Found course:', currentCourse);
+
+            if (!currentCourse) {
+                console.error('❌ Course not found! Available IDs:', courses.map(c => c._id || c.id || `course_${c.title}`));
+                alert('Course not found. Redirecting to profile...');
+                window.location.href = 'profile.html';
+                return;
+            }
+
+            // Ensure course has modules array with proper structure
+            if (!currentCourse.modules || currentCourse.modules.length === 0) {
+                console.warn('⚠️ Course has no modules. Course object:', currentCourse);
+                alert('This course has no modules yet. Redirecting to profile...');
+                window.location.href = 'profile.html';
+                return;
+            }
+
+            console.log('✅ Course loaded successfully!');
+            console.log('Modules:', currentCourse.modules);
+            console.log('Modules length:', currentCourse.modules ? currentCourse.modules.length : 'N/A');
+            if (currentCourse.modules && currentCourse.modules.length > 0) {
+                console.log('First module:', currentCourse.modules[0]);
+            }
+
+            // Validate course data
+            const validationIssues = validateCourseData(currentCourse);
+            if (validationIssues.length > 0) {
+                console.warn('⚠️ Some data validation issues found (but continuing anyway)');
+            }
+
+            // Check if there's a saved position
+            const savedPosition = getSavedPosition(courseId);
+            currentModuleIndex = savedPosition || 0;
+
+            console.log('📍 Starting module index:', currentModuleIndex);
+            console.log('🔄 Calling displayCourse()...');
+            displayCourse();
+            console.log('✅ displayCourse() completed');
+        }
+
+        function getSavedPosition(courseId) {
+            const key = `careersync_course_${courseId}_position`;
+            const saved = localStorage.getItem(key);
+            return saved ? parseInt(saved) : 0;
+        }
+
+        function savePosition(courseId, moduleIndex) {
+            const key = `careersync_course_${courseId}_position`;
+            localStorage.setItem(key, moduleIndex.toString());
+        }
+
+        function displayCourse() {
+            if (!currentCourse) {
+                console.error('❌ Cannot display course: currentCourse is null');
+                return;
+            }
+
+            console.log('=== DISPLAYING COURSE ===');
+            console.log('Course:', currentCourse);
+            console.log('Modules:', currentCourse.modules);
+
+            const courseId = currentCourse._id || currentCourse.id || `course_${currentCourse.title}`;
+            const modules = currentCourse.modules || [];
+            
+            console.log('📊 Total modules to display:', modules.length);
+            
+            // Update sidebar header
+            const titleElement = document.getElementById('sidebar-course-title');
+            if (titleElement) {
+                titleElement.textContent = currentCourse.title;
+                console.log('✅ Updated sidebar title:', currentCourse.title);
+            }
+            
+            // Calculate overall progress
+            updateProgress();
+
+            // Display modules list
+            const modulesList = document.getElementById('modules-list');
+            if (!modulesList) {
+                console.error('❌ Cannot find modules-list element');
+                return;
+            }
+
+            if (modules.length === 0) {
+                console.warn('⚠️ No modules to display');
+                modulesList.innerHTML = '<div style="padding: 20px; color: #94A3B8;">No modules available</div>';
+                return;
+            }
+
+            const modulesHTML = modules.map((module, index) => {
+                const moduleId = module.id || module._id || `module_${index}`;
+                const isCompleted = isModuleFullyCompleted(courseId, moduleId);
+                const isActive = index === currentModuleIndex;
+                
+                console.log(`📌 Module ${index}: "${module.title || 'Untitled'}" (Active: ${isActive}, Completed: ${isCompleted})`);
+                
+                return `
+                    <div class="module-item ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''}" 
+                         onclick="selectModule(${index})">
+                        <div class="module-header">
+                            <div class="module-number">${isCompleted ? '✓' : index + 1}</div>
+                            <div class="module-title">${module.title || `Module ${index + 1}`}</div>
+                        </div>
+                        <div class="module-meta">${module.duration || 'Duration not set'}</div>
+                    </div>
+                `;
+            }).join('');
+
+            console.log('🎯 Setting HTML for modules list:', modulesHTML.substring(0, 200) + '...');
+            modulesList.innerHTML = modulesHTML;
+            console.log('✅ Modules list rendered successfully');
+
+            // Display selected module
+            displayModule(currentModuleIndex);
+        }
+
+        function selectModule(index) {
+            currentModuleIndex = index;
+            const courseId = currentCourse._id || currentCourse.id || `course_${currentCourse.title}`;
+            savePosition(courseId, index);
+            displayCourse();
+        }
+
+        function displayModule(index) {
+            const modules = currentCourse.modules || [];
+            if (index < 0 || index >= modules.length) return;
+
+            const module = modules[index];
+            
+            console.log('=== DISPLAYING MODULE ===');
+            console.log('Module index:', index);
+            console.log('Module data:', module);
+            console.log('Module topics:', module.topics);
+            console.log('Module activities:', module.activities);
+            console.log('Module readingMaterials:', module.readingMaterials);
+            console.log('Module youtubeLinks:', module.youtubeLinks);
+            console.log('Module project:', module.project);
+            console.log('Module assessment:', module.assessment);
+            
+            const courseId = currentCourse._id || currentCourse.id || `course_${currentCourse.title}`;
+            const moduleId = module.id || module._id || `module_${index}`;
+
+            // Update header
+            document.getElementById('content-title').textContent = module.title || `Module ${index + 1}`;
+            document.getElementById('content-meta').innerHTML = `
+                <span>📚 Module ${index + 1} of ${modules.length}</span>
+                <span>⏱️ ${module.duration || 'Duration not set'}</span>
+            `;
+
+            // Update body with rich content
+            const contentBody = document.getElementById('content-body');
+            const topics = module.topics || [];
+            const activities = module.activities || [];
+            const readingMaterials = module.readingMaterials || [];
+            
+            let contentHTML = '';
+
+            // Module description
+            if (module.description) {
+                contentHTML += `<div class="module-description">${module.description}</div>`;
+            }
+
+            // Main module content (if available)
+            if (module.content) {
+                contentHTML += `<div class="module-content">${formatModuleContent(module.content)}</div>`;
+            }
+
+            // Topics section
+            if (topics && topics.length > 0) {
+                console.log('✅ Building topics section with', topics.length, 'topics');
+                contentHTML += `<div class="topics-section">
+                    <div class="section-title">📝 Topics to Learn (${topics.length})</div>`;
+                
+                topics.forEach((topic, topicIndex) => {
+                    const topicId = `topic_${topicIndex}`;
+                    const isCompleted = isTopicCompleted(courseId, moduleId, topicId);
+                    
+                    // Handle both string topics and object topics
+                    const topicTitle = typeof topic === 'string' ? topic : (topic.title || topic.name || `Topic ${topicIndex + 1}`);
+                    const topicDesc = typeof topic === 'object' ? (topic.description || topic.content || '') : '';
+                    
+                    console.log(`  Topic ${topicIndex + 1}:`, topicTitle);
+                    
+                    contentHTML += `
+                        <div class="topic-item ${isCompleted ? 'completed' : ''}" id="topic-${topicIndex}">
+                            <div class="topic-item-header">
+                                <input 
+                                    type="checkbox" 
+                                    class="topic-checkbox"
+                                    ${isCompleted ? 'checked' : ''}
+                                    onchange="toggleTopicCompletion('${courseId}', '${moduleId}', '${topicId}', this.checked)"
+                                >
+                                <div class="topic-content">
+                                    <div class="topic-title">${topicTitle}</div>
+                                    ${topicDesc ? `<div class="topic-description">${topicDesc}</div>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                contentHTML += `</div>`;
+            } else {
+                console.log('⚠️ No topics in this module - topics value:', topics);
+            }
+
+            // Activities section
+            if (activities && activities.length > 0) {
+                console.log('✅ Building activities section with', activities.length, 'activities');
+                contentHTML += `<div class="activities-section">
+                    <div class="section-title">🎯 Activities & Exercises (${activities.length})</div>`;
+                
+                activities.forEach((activity, idx) => {
+                    const activityText = typeof activity === 'string' ? activity : (activity.title || activity.description || 'Activity');
+                    console.log(`  Activity ${idx + 1}:`, activityText.substring(0, 50) + '...');
+                    contentHTML += `<div class="activity-item">${activityText}</div>`;
+                });
+                
+                contentHTML += `</div>`;
+            } else {
+                console.log('⚠️ No activities in this module - activities value:', activities);
+            }
+
+            // Project section
+            if (module.project) {
+                console.log('✅ Adding project to content');
+                const projectText = typeof module.project === 'string' ? module.project : (module.project.description || module.project.title || 'Project');
+                contentHTML += `
+                    <div class="activities-section">
+                        <div class="section-title">🚀 Module Project</div>
+                        <div class="activity-item" style="background: #F0F9FF; border-left-color: #3B82F6;">
+                            ${projectText}
+                        </div>
+                    </div>
+                `;
+            } else {
+                console.log('⚠️ No project in this module');
+            }
+
+            // Assessment section
+            if (module.assessment) {
+                console.log('✅ Adding assessment to content');
+                const assessmentText = typeof module.assessment === 'string' ? module.assessment : (module.assessment.description || 'Assessment available');
+                contentHTML += `
+                    <div class="activities-section">
+                        <div class="section-title">✅ Assessment</div>
+                        <div class="activity-item" style="background: #FEF3C7; border-left-color: #F59E0B;">
+                            ${assessmentText}
+                        </div>
+                    </div>
+                `;
+            } else {
+                console.log('⚠️ No assessment in this module');
+            }
+
+            // Reading materials section
+            if (readingMaterials && readingMaterials.length > 0) {
+                console.log('✅ Building reading materials section with', readingMaterials.length, 'materials');
+                contentHTML += `<div class="reading-materials">
+                    <div class="section-title">📖 Reading Materials (${readingMaterials.length})</div>`;
+                
+                readingMaterials.forEach((material, idx) => {
+                    const title = material.title || `Reading Material ${idx + 1}`;
+                    const source = material.source || '';
+                    const url = material.url || '#';
+                    const difficulty = material.difficulty || '';
+                    const readTime = material.estimatedReadTime || material.readTime || '';
+                    
+                    console.log(`  Reading ${idx + 1}:`, title);
+                    
+                    contentHTML += `
+                        <div class="reading-item">
+                            <div class="reading-item-title">${title}</div>
+                            ${source ? `<div class="reading-item-meta">📚 Source: ${source}</div>` : ''}
+                            ${difficulty ? `<div class="reading-item-meta">📊 Level: ${difficulty}</div>` : ''}
+                            ${readTime ? `<div class="reading-item-meta">⏱️ ${readTime}</div>` : ''}
+                            ${url !== '#' ? `<a href="${url}" target="_blank" class="reading-item-link">Open Resource →</a>` : ''}
+                        </div>
+                    `;
+                });
+                
+                contentHTML += `</div>`;
+            } else {
+                console.log('⚠️ No reading materials in this module - readingMaterials value:', readingMaterials);
+            }
+
+            // If no content at all
+            if (!contentHTML || contentHTML.trim() === '') {
+                console.log('⚠️ No content HTML generated!');
+                console.log('Module object keys:', Object.keys(module));
+                console.log('Topics type:', typeof topics, 'Length:', topics ? topics.length : 'N/A');
+                console.log('Activities type:', typeof activities, 'Length:', activities ? activities.length : 'N/A');
+                console.log('ReadingMaterials type:', typeof readingMaterials, 'Length:', readingMaterials ? readingMaterials.length : 'N/A');
+                
+                contentHTML = `
+                    <div class="empty-state">
+                        <h3>📋 Module: ${module.title || 'Unknown'}</h3>
+                        <p>${module.description || 'No description available'}</p>
+                        ${module.duration ? `<p><strong>Duration:</strong> ${module.duration}</p>` : ''}
+                        <hr style="margin: 20px 0; border: none; border-top: 1px solid #ddd;">
+                        <details style="text-align: left; color: #666; font-size: 12px; margin-top: 20px;">
+                            <summary style="cursor: pointer; font-weight: bold;">🔍 Debug Information</summary>
+                            <pre style="background: #f5f5f5; padding: 10px; border-radius: 4px; overflow-x: auto; margin-top: 10px; font-size: 11px;">Module Data Structure:
+${JSON.stringify(module, null, 2)}
+                            </pre>
+                        </details>
+                    </div>
+                `;
+            } else {
+                console.log('✅ Generated content - HTML length:', contentHTML.length);
+            }
+
+            // Add YouTube links section (if available in module)
+            if (module.youtubeLinks && module.youtubeLinks.length > 0) {
+                console.log('✅ Adding', module.youtubeLinks.length, 'YouTube links');
+                contentHTML += `<div class="youtube-section" style="margin-top: 30px; padding-top: 30px; border-top: 2px solid #e5e7eb;">
+                    <div class="section-title">🎥 Video Resources (${module.youtubeLinks.length})</div>`;
+                
+                module.youtubeLinks.forEach((link, idx) => {
+                    const title = link.title || `Video ${idx + 1}`;
+                    const url = link.url || link;
+                    const duration = link.duration || '';
+                    
+                    contentHTML += `
+                        <div class="video-item" style="margin-bottom: 15px; padding: 15px; background: #f0f9ff; border-radius: 8px; border-left: 4px solid #3b82f6;">
+                            <div style="display: flex; justify-content: space-between; align-items: start;">
+                                <div style="flex: 1;">
+                                    <div class="video-title" style="font-weight: 600; margin-bottom: 8px;">🎬 ${title}</div>
+                                    ${duration ? `<div style="font-size: 13px; color: #666;">⏱️ ${duration}</div>` : ''}
+                                </div>
+                                <a href="${url}" target="_blank" class="video-link" style="
+                                    display: inline-block;
+                                    background: #3b82f6;
+                                    color: white;
+                                    padding: 8px 16px;
+                                    border-radius: 6px;
+                                    text-decoration: none;
+                                    font-weight: 600;
+                                    font-size: 13px;
+                                    white-space: nowrap;
+                                    margin-left: 10px;
+                                    transition: all 0.3s;
+                                ">Watch →</a>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                contentHTML += `</div>`;
+            }
+
+            // Add Mark as Complete button at the bottom
+            const isModuleCompleted = isModuleFullyCompleted(courseId, moduleId);
+            contentHTML += `
+                <div style="margin-top: 40px; padding-top: 30px; border-top: 2px solid #e5e7eb; text-align: center;">
+                    <button 
+                        onclick="markModuleCompleted('${courseId}', '${moduleId}', this)"
+                        style="
+                            background: ${isModuleCompleted ? '#10b981' : '#3b82f6'};
+                            color: white;
+                            border: none;
+                            padding: 12px 32px;
+                            font-size: 16px;
+                            font-weight: 600;
+                            border-radius: 8px;
+                            cursor: pointer;
+                            transition: all 0.3s;
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 8px;
+                        "
+                        onmouseover="this.style.opacity='0.9'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 5px 15px rgba(0,0,0,0.2)';"
+                        onmouseout="this.style.opacity='1'; this.style.transform='translateY(0)'; this.style.boxShadow='none';"
+                    >
+                        ${isModuleCompleted ? '✅ Completed' : '✓ Mark as Complete'}
+                    </button>
+                    <p style="margin-top: 15px; color: #666; font-size: 14px;">
+                        ${isModuleCompleted ? '🎉 Great job! You\'ve completed this module.' : 'Click when you\'ve finished all content in this module'}
+                    </p>
+                </div>
+            `;
+
+            console.log('Setting content body HTML...');
+            contentBody.innerHTML = contentHTML;
+            console.log('Content body updated!');
+
+            // Update navigation buttons
+            document.getElementById('prev-btn').disabled = index === 0;
+            document.getElementById('next-btn').disabled = index === modules.length - 1;
+        }
+
+        // Format module content (convert line breaks, lists, etc.)
+        function formatModuleContent(content) {
+            if (!content) return '';
+            
+            // If content is already HTML-like, return as is
+            if (content.includes('<')) return content;
+            
+            // Convert markdown-style formatting to HTML
+            let formatted = content
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/\n\n/g, '</p><p>')
+                .replace(/\n/g, '<br>');
+            
+            // Wrap in paragraph tags if not already wrapped
+            if (!formatted.startsWith('<')) {
+                formatted = `<p>${formatted}</p>`;
+            }
+            
+            return formatted;
+        }
+
+        function navigateToPrevious() {
+            if (currentModuleIndex > 0) {
+                selectModule(currentModuleIndex - 1);
+            }
+        }
+
+        function navigateToNext() {
+            const modules = currentCourse.modules || [];
+            if (currentModuleIndex < modules.length - 1) {
+                selectModule(currentModuleIndex + 1);
+            }
+        }
+
+        // Topic completion tracking
+        function getCompletedTopicsKey(courseId, moduleId) {
+            return `careersync_course_${courseId}_module_${moduleId}_topics`;
+        }
+
+        function getCompletedTopics(courseId, moduleId) {
+            const key = getCompletedTopicsKey(courseId, moduleId);
+            const data = localStorage.getItem(key);
+            return data ? JSON.parse(data) : [];
+        }
+
+        function isTopicCompleted(courseId, moduleId, topicId) {
+            const completed = getCompletedTopics(courseId, moduleId);
+            return completed.includes(topicId);
+        }
+
+        function toggleTopicCompletion(courseId, moduleId, topicId, isChecked) {
+            const completed = getCompletedTopics(courseId, moduleId);
+            
+            if (isChecked && !completed.includes(topicId)) {
+                completed.push(topicId);
+            } else if (!isChecked) {
+                const index = completed.indexOf(topicId);
+                if (index > -1) completed.splice(index, 1);
+            }
+
+            const key = getCompletedTopicsKey(courseId, moduleId);
+            localStorage.setItem(key, JSON.stringify(completed));
+
+            // Update UI
+            updateProgress();
+            displayCourse();
+        }
+
+        function isModuleFullyCompleted(courseId, moduleId) {
+            const modules = currentCourse.modules || [];
+            const module = modules.find(m => (m.id || m._id || `module_${modules.indexOf(m)}`) === moduleId);
+            if (!module) return false;
+
+            const totalTopics = (module.topics || []).length;
+            if (totalTopics === 0) return false;
+
+            const completedTopics = getCompletedTopics(courseId, moduleId).length;
+            return completedTopics >= totalTopics;
+        }
+
+        function markModuleCompleted(courseId, moduleId, buttonElement) {
+            const modules = currentCourse.modules || [];
+            const moduleIndex = modules.findIndex(m => (m.id || m._id || `module_${modules.indexOf(m)}`) === moduleId);
+            if (moduleIndex === -1) return;
+
+            const module = modules[moduleIndex];
+            const topics = module.topics || [];
+            
+            // Mark all topics as completed
+            const completed = getCompletedTopics(courseId, moduleId);
+            topics.forEach((topic, topicIndex) => {
+                const topicId = `topic_${topicIndex}`;
+                if (!completed.includes(topicId)) {
+                    completed.push(topicId);
+                }
+            });
+
+            const key = getCompletedTopicsKey(courseId, moduleId);
+            localStorage.setItem(key, JSON.stringify(completed));
+
+            console.log('✅ Module completed:', moduleId);
+
+            // Update button appearance
+            buttonElement.style.background = '#10b981';
+            buttonElement.textContent = '✅ Completed';
+            buttonElement.style.cursor = 'default';
+            buttonElement.disabled = true;
+
+            // Update progress
+            updateProgress();
+
+            // Refresh the module display
+            displayModule(currentModuleIndex);
+
+            // Show success message
+            const message = document.createElement('div');
+            message.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #10b981;
+                color: white;
+                padding: 15px 20px;
+                border-radius: 8px;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+                z-index: 1000;
+                animation: slideIn 0.3s ease;
+            `;
+            message.textContent = '🎉 Module marked as complete! Progress updated.';
+            document.body.appendChild(message);
+
+            setTimeout(() => {
+                message.style.opacity = '0';
+                message.style.transition = 'opacity 0.3s';
+                setTimeout(() => message.remove(), 300);
+            }, 3000);
+        }
+
+        function updateProgress() {
+            const courseId = currentCourse._id || currentCourse.id || `course_${currentCourse.title}`;
+            const modules = currentCourse.modules || [];
+            
+            let totalTopics = 0;
+            let completedTopicsCount = 0;
+
+            modules.forEach((module, index) => {
+                const moduleId = module.id || module._id || `module_${index}`;
+                const topics = module.topics || [];
+                totalTopics += topics.length;
+                completedTopicsCount += getCompletedTopics(courseId, moduleId).length;
+            });
+
+            const percentage = totalTopics > 0 ? Math.round((completedTopicsCount / totalTopics) * 100) : 0;
+
+            // Update sidebar progress
+            document.getElementById('sidebar-progress-fill').style.width = percentage + '%';
+            document.getElementById('sidebar-progress-text').textContent = percentage + '%';
+
+            // Save to localStorage for profile page
+            const courses = JSON.parse(localStorage.getItem('careersync_enrolled_courses') || '[]');
+            const courseIndex = courses.findIndex(c => (c._id || c.id || `course_${c.title}`) === courseId);
+            if (courseIndex > -1) {
+                courses[courseIndex].progress = percentage;
+                courses[courseIndex].completedTopics = completedTopicsCount;
+                courses[courseIndex].totalTopics = totalTopics;
+                localStorage.setItem('careersync_enrolled_courses', JSON.stringify(courses));
+            }
+        }
+
+        // Enhanced diagnostic function
+        function showDiagnostics() {
+            console.clear();
+            console.log('%c════════════════════════════════════════', 'color: #4F46E5; font-weight: bold; font-size: 14px');
+            console.log('%c🔍 COURSE VIEWER DIAGNOSTICS', 'color: #4F46E5; font-weight: bold; font-size: 14px');
+            console.log('%c════════════════════════════════════════', 'color: #4F46E5; font-weight: bold; font-size: 14px');
+            
+            // 1. Check URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const courseIdFromURL = urlParams.get('courseId');
+            console.log('\n📍 URL Parameters:');
+            console.log('  courseId:', courseIdFromURL);
+            
+            // 2. Check localStorage
+            console.log('\n💾 localStorage State:');
+            const stored = localStorage.getItem('careersync_enrolled_courses');
+            if (stored) {
+                try {
+                    const courses = JSON.parse(stored);
+                    console.log('  ✅ Found', courses.length, 'courses in localStorage');
+                    courses.forEach((course, idx) => {
+                        const cId = course._id || course.id || `course_${course.title}`;
+                        const modules = course.modules || [];
+                        console.log(`\n  [${idx}] ${course.title}`);
+                        console.log(`      ID: ${cId}`);
+                        console.log(`      Modules: ${modules.length}`);
+                        if (modules.length > 0) {
+                            console.log(`      First module: ${modules[0].title || 'Untitled'}`);
+                            console.log(`      Topics: ${modules[0].topics ? modules[0].topics.length : 0}`);
+                        }
+                    });
+                } catch (e) {
+                    console.log('  ❌ Error parsing stored courses:', e.message);
+                }
+            } else {
+                console.log('  ❌ No courses in localStorage');
+            }
+            
+            // 3. Check current course
+            console.log('\n📚 Current Course State:');
+            console.log('  currentCourse:', currentCourse ? 'SET' : 'NOT SET');
+            console.log('  currentModuleIndex:', currentModuleIndex);
+            
+            console.log('%c════════════════════════════════════════', 'color: #4F46E5; font-weight: bold; font-size: 14px');
+            console.log('%c✅ Diagnostics Complete - Check above for issues', 'color: #10B981; font-weight: bold');
+            console.log('%c════════════════════════════════════════', 'color: #4F46E5; font-weight: bold; font-size: 14px');
+        }
+
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                showDiagnostics();
+                initializeCourse();
+            }, 100);
+        });
+    </script>
+</body>
+</html>
