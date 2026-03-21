@@ -16,6 +16,22 @@ interface AuthContextType {
   isAuthenticated: boolean
 }
 
+const ADMIN_EMAILS = new Set([
+  'harishbonu3@gmail.com',
+  'poojithadoppa8@gmail.com'
+])
+
+function normalizeUserRole(rawUser: any): User {
+  const email = String(rawUser?.email || '').trim().toLowerCase()
+  const role = ADMIN_EMAILS.has(email) ? 'admin' : (rawUser?.role || 'learner')
+
+  return {
+    ...rawUser,
+    email,
+    role,
+  }
+}
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 // API URL
@@ -35,11 +51,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (authToken && authUser) {
         console.log('✅ Auth found in URL, storing in localStorage')
         localStorage.setItem('careersync_token', authToken)
-        localStorage.setItem('careersync_user', authUser)
+        try {
+          const parsed = JSON.parse(authUser)
+          const normalizedUser = normalizeUserRole(parsed)
+          localStorage.setItem('careersync_user', JSON.stringify(normalizedUser))
+          setUser(normalizedUser)
+          setIsAuthenticated(true)
+        } catch {
+          localStorage.setItem('careersync_user', authUser)
+        }
         
         // Parse and set user
         try {
-          const userData = JSON.parse(authUser)
+          const userData = normalizeUserRole(JSON.parse(authUser))
           setUser(userData)
           setIsAuthenticated(true)
         } catch (e) {
@@ -86,7 +110,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (response.ok) {
         const data = await response.json()
-        const userData = data.user || data
+        const userData = normalizeUserRole(data.user || data)
         setUser(userData)
         setIsAuthenticated(true)
         // Store user data for other apps to access
@@ -106,10 +130,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       if (storedUser) {
         try {
-          const userData = JSON.parse(storedUser)
+          const userData = normalizeUserRole(JSON.parse(storedUser))
           console.log('✅ Using localStorage auth:', userData)
           setUser(userData)
           setIsAuthenticated(true)
+          localStorage.setItem('careersync_user', JSON.stringify(userData))
           return
         } catch (e) {
           console.error('Error parsing stored user:', e)
@@ -135,7 +160,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (response.ok) {
         const data = await response.json()
-        const userData = data.user || data
+        const userData = normalizeUserRole(data.user || data)
         
         // Store token if provided
         if (data.token && typeof window !== 'undefined') {

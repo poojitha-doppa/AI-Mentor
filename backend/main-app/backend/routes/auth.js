@@ -7,6 +7,10 @@ import { getDeviceInfo, generateSessionId } from '../utils/deviceDetector.js';
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+const ADMIN_EMAILS = new Set([
+  'harishbonu3@gmail.com',
+  'poojithadoppa8@gmail.com'
+]);
 
 const EMAILJS_SERVICE_ID = process.env.EMAILJS_SERVICE_ID;
 const EMAILJS_TEMPLATE_ID = process.env.EMAILJS_TEMPLATE_ID;
@@ -31,29 +35,52 @@ function setAuthCookie(res, token) {
   res.cookie('Career_Sync_token', token, COOKIE_OPTIONS);
 }
 
+function normalizeEmail(email = '') {
+  return String(email).trim().toLowerCase();
+}
+
+function isAdminEmail(email = '') {
+  return ADMIN_EMAILS.has(normalizeEmail(email));
+}
+
+async function ensureAdminRole(user) {
+  if (user && isAdminEmail(user.email) && user.role !== 'admin') {
+    user.role = 'admin';
+    await user.save();
+  }
+  return user;
+}
+
 // Register/Signup endpoint
 router.post('/register', async (req, res) => {
   try {
     const { email, password, name, phone } = req.body;
+    const normalizedEmail = normalizeEmail(email);
 
-    if (!email || !password) {
+    if (!normalizedEmail || !password) {
       return res.status(400).json({ error: 'Email and password are required' });
     }
 
-    const existing = await User.findOne({ email });
+    const existing = await User.findOne({ email: normalizedEmail });
     if (existing) {
       return res.status(400).json({ error: 'User already exists' });
     }
 
     const passwordHash = await bcryptjs.hash(password, 10);
-    const user = await User.create({ email, passwordHash, name, phone });
+    const user = await User.create({
+      email: normalizedEmail,
+      passwordHash,
+      name,
+      phone,
+      role: isAdminEmail(normalizedEmail) ? 'admin' : 'user'
+    });
 
     const token = jwt.sign({ id: user._id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
     setAuthCookie(res, token);
     res.json({ 
       message: 'User registered successfully',
       token: token, // Include token for cross-domain navigation
-      user: { id: user._id, email: user.email, name: user.name }
+      user: { id: user._id, email: user.email, name: user.name, role: user.role }
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -69,12 +96,13 @@ router.post('/signup', async (req, res) => {
 router.post('/login', async (req, res) => {
   try {
     const { email, password, deviceInfo } = req.body;
+    const normalizedEmail = normalizeEmail(email);
 
-    if (!email || !password) {
+    if (!normalizedEmail || !password) {
       return res.status(400).json({ error: 'Email and password are required' });
     }
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email: normalizedEmail });
     if (!user) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
@@ -83,6 +111,8 @@ router.post('/login', async (req, res) => {
     if (!passwordMatch) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
+
+    await ensureAdminRole(user);
 
     // Capture device information from request
     const detectedDeviceInfo = await getDeviceInfo(req);
@@ -119,12 +149,13 @@ router.post('/login', async (req, res) => {
 router.post('/request-otp', async (req, res) => {
   try {
     const { email } = req.body;
+    const normalizedEmail = normalizeEmail(email);
 
-    if (!email) {
+    if (!normalizedEmail) {
       return res.status(400).json({ error: 'Email is required' });
     }
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email: normalizedEmail });
     if (!user) {
       return res.status(404).json({ error: 'User not found. Please register first.' });
     }
@@ -140,7 +171,7 @@ router.post('/request-otp', async (req, res) => {
     res.json({ message: 'OTP sent to email' });
 
     sendOtpEmail({
-      toEmail: email,
+      toEmail: normalizedEmail,
       otp,
       serviceId: EMAILJS_SERVICE_ID,
       templateId: EMAILJS_TEMPLATE_ID,
@@ -159,12 +190,13 @@ router.post('/request-otp', async (req, res) => {
 router.post('/login-otp', async (req, res) => {
   try {
     const { email, otp, deviceInfo } = req.body;
+    const normalizedEmail = normalizeEmail(email);
 
-    if (!email || !otp) {
+    if (!normalizedEmail || !otp) {
       return res.status(400).json({ error: 'Email and OTP are required' });
     }
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email: normalizedEmail });
     if (!user || !user.otpCode || !user.otpExpiresAt) {
       return res.status(401).json({ error: 'OTP not requested or invalid' });
     }
@@ -180,6 +212,7 @@ router.post('/login-otp', async (req, res) => {
 
     user.otpCode = undefined;
     user.otpExpiresAt = undefined;
+    await ensureAdminRole(user);
     
     // Capture device information from request
     const detectedDeviceInfo = await getDeviceInfo(req);
@@ -218,13 +251,14 @@ router.post('/verify', async (req, res) => {
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-    const user = await User.findById(decoded.id).select('email name');
+    const user = await User.findById(decoded.id).select('email name role');
     if (!user) {
       return res.status(401).json({ error: 'Invalid token' });
     }
+    await ensureAdminRole(user);
     res.json({ 
       message: 'Token is valid',
-      user: { id: user._id, email: user.email, name: user.name }
+      user: { id: user._id, email: user.email, name: user.name, role: user.role }
     });
   } catch (error) {
     res.status(401).json({ error: 'Invalid token' });
@@ -256,14 +290,16 @@ router.get('/me', async (req, res) => {
     }
 
     const decoded = jwt.verify(token, JWT_SECRET);
-    const user = await User.findById(decoded.id).select('email name');
+    const user = await User.findById(decoded.id).select('email name role');
     
     if (!user) {
       return res.status(401).json({ error: 'User not found' });
     }
 
+    await ensureAdminRole(user);
+
     res.json({ 
-      user: { id: user._id, email: user.email, name: user.name }
+      user: { id: user._id, email: user.email, name: user.name, role: user.role }
     });
   } catch (error) {
     res.status(401).json({ error: 'Invalid or expired token' });
@@ -274,8 +310,9 @@ router.get('/me', async (req, res) => {
 router.post('/reset-password', async (req, res) => {
   try {
     const { email, otp, newPassword } = req.body;
+    const normalizedEmail = normalizeEmail(email);
 
-    if (!email || !otp || !newPassword) {
+    if (!normalizedEmail || !otp || !newPassword) {
       return res.status(400).json({ error: 'Email, OTP, and new password are required' });
     }
 
@@ -283,7 +320,7 @@ router.post('/reset-password', async (req, res) => {
       return res.status(400).json({ error: 'Password must be at least 8 characters' });
     }
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email: normalizedEmail });
     if (!user || !user.otpCode || !user.otpExpiresAt) {
       return res.status(401).json({ error: 'OTP not requested or invalid' });
     }
@@ -302,6 +339,7 @@ router.post('/reset-password', async (req, res) => {
     user.passwordHash = passwordHash;
     user.otpCode = undefined;
     user.otpExpiresAt = undefined;
+    await ensureAdminRole(user);
     await user.save();
 
     // Generate token for auto-login
@@ -309,7 +347,7 @@ router.post('/reset-password', async (req, res) => {
     setAuthCookie(res, token);
     res.json({ 
       message: 'Password reset successful',
-      user: { id: user._id, email: user.email, name: user.name }
+      user: { id: user._id, email: user.email, name: user.name, role: user.role }
     });
   } catch (error) {
     console.error('Password reset error:', error.message);
@@ -321,21 +359,23 @@ router.post('/reset-password', async (req, res) => {
 router.post('/google-signin', async (req, res) => {
   try {
     const { credential, email, name, google_id, picture } = req.body;
+    const normalizedEmail = normalizeEmail(email);
 
-    if (!credential || !email) {
+    if (!credential || !normalizedEmail) {
       return res.status(400).json({ error: 'Invalid Google credential' });
     }
 
     // Find or create user
-    let user = await User.findByEmail(email);
+    let user = await User.findByEmail(normalizedEmail);
     
     if (!user) {
       // Create new user from Google data
       user = await User.create({
-        email,
-        name: name || email.split('@')[0],
+        email: normalizedEmail,
+        name: name || normalizedEmail.split('@')[0],
         provider: 'google',
         status: 'active',
+        role: isAdminEmail(normalizedEmail) ? 'admin' : 'user',
         passwordHash: '', // No password for OAuth users
         metadata: {
           google_id,
@@ -350,6 +390,8 @@ router.post('/google-signin', async (req, res) => {
       user.metadata.picture = picture;
       await user.save();
     }
+
+    await ensureAdminRole(user);
 
     // Record login
     await user.recordLogin();

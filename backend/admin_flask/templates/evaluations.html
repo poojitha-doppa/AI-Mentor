@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %}Evaluations{% endblock %}
+
+{% block content %}
+<section>
+  <h1>Skill Evaluation Logs</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>User Email</th>
+        <th>Score</th>
+        <th>Details</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in evaluations %}
+      <tr>
+        <td>{{ item.user_email or '-' }}</td>
+        <td>{{ item.score }}</td>
+        <td class="details-cell">{{ item.details }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}

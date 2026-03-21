@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %}Roadmaps{% endblock %}
+
+{% block content %}
+<section>
+  <h1>Roadmap Logs</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>User Email</th>
+        <th>Roadmap</th>
+        <th>Details</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for roadmap in roadmaps %}
+      <tr>
+        <td>{{ roadmap.user_email or '-' }}</td>
+        <td>{{ roadmap.title }}</td>
+        <td class="details-cell">{{ roadmap.details }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<section>
+  <h1>Dashboard</h1>
+  <div class="stats-grid">
+    <article class="stat-card">
+      <h3>Total Users</h3>
+      <p>{{ stats.total_users }}</p>
+    </article>
+    <article class="stat-card">
+      <h3>Total Courses Generated</h3>
+      <p>{{ stats.total_courses }}</p>
+    </article>
+    <article class="stat-card">
+      <h3>Total Roadmaps Generated</h3>
+      <p>{{ stats.total_roadmaps }}</p>
+    </article>
+    <article class="stat-card">
+      <h3>Total Skill Evaluations</h3>
+      <p>{{ stats.total_evaluations }}</p>
+    </article>
+  </div>
+</section>
+{% endblock %}
