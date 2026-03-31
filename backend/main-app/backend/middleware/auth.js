@@ -9,14 +9,21 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-producti
  */
 export const authenticate = async (req, res, next) => {
   try {
-    const token = req.cookies.Career_Sync_token;
+    let token = req.cookies.Career_Sync_token;
+
+    if (!token) {
+      const authHeader = req.headers.authorization;
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        token = authHeader.substring(7);
+      }
+    }
     
     if (!token) {
       return res.status(401).json({ error: 'Authentication required' });
     }
 
     const decoded = jwt.verify(token, JWT_SECRET);
-    const user = await User.findById(decoded.id).select('email name');
+    const user = await User.findById(decoded.id).select('email name role');
     
     if (!user) {
       return res.status(401).json({ error: 'User not found' });
@@ -25,7 +32,15 @@ export const authenticate = async (req, res, next) => {
     req.user = {
       id: user._id,
       email: user.email,
-      name: user.name
+      name: user.name,
+      role: user.role,
+      isAdmin: user.role === 'admin'
+    };
+
+    req.session = {
+      sessionId: decoded.sessionId,
+      role: decoded.role,
+      isAdmin: Boolean(decoded.isAdmin)
     };
     
     next();
@@ -40,17 +55,32 @@ export const authenticate = async (req, res, next) => {
  */
 export const optionalAuth = async (req, res, next) => {
   try {
-    const token = req.cookies.Career_Sync_token;
+    let token = req.cookies.Career_Sync_token;
+
+    if (!token) {
+      const authHeader = req.headers.authorization;
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        token = authHeader.substring(7);
+      }
+    }
     
     if (token) {
       const decoded = jwt.verify(token, JWT_SECRET);
-      const user = await User.findById(decoded.id).select('email name');
+      const user = await User.findById(decoded.id).select('email name role');
       
       if (user) {
         req.user = {
           id: user._id,
           email: user.email,
-          name: user.name
+          name: user.name,
+          role: user.role,
+          isAdmin: user.role === 'admin'
+        };
+
+        req.session = {
+          sessionId: decoded.sessionId,
+          role: decoded.role,
+          isAdmin: Boolean(decoded.isAdmin)
         };
       }
     }
@@ -59,4 +89,12 @@ export const optionalAuth = async (req, res, next) => {
   }
   
   next();
+};
+
+export const requireAdmin = (req, res, next) => {
+  if (!req.user || req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'Access Denied' });
+  }
+
+  return next();
 };

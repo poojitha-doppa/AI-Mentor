@@ -56,11 +56,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             // User is LOGGED IN
             const userEmail = response.user.email || '';
             const userName = response.user.name || userEmail.split('@')[0];
+            const isAdminUser = response.user.role === 'admin';
+            const adminLink = isAdminUser
+                ? `<a href="/admin-dashboard.html" style="margin-right: 8px; font-size: 0.85rem; color: #4F46E5; text-decoration: none; font-weight: 600;">Admin Dashboard</a>`
+                : '';
 
             // Update Nav
             if (navAuthContainer) {
                 navAuthContainer.innerHTML = `
                     <div class="user-menu">
+                        ${adminLink}
                         <span class="user-name" title="${userEmail}">${userName}</span>
                         <button id="btn-logout" class="logout-btn">Sign Out</button>
                     </div>

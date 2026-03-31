@@ -6,6 +6,13 @@ const GOOGLE_CLIENT_ID = '844001953688-5r9hfnp15akd17ouu20h2hgv8s4jbprm.apps.goo
 // Global views object
 let views = {};
 
+function getPostLoginUrl(user = {}) {
+    if (user && user.role === 'admin') {
+        return window.getModuleUrls().landing + '/admin-dashboard.html';
+    }
+    return window.getModuleUrls().landing + '/profile.html';
+}
+
 // Make switchView global for onclick handlers
 window.switchView = function(viewName) {
     Object.values(views).forEach(el => el.classList.remove('active'));
@@ -90,9 +97,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.log('✅ Token stored in localStorage');
             }
             
-            // Redirect to home page
-            console.log('Redirecting to home page...');
-            window.location.href = window.getModuleUrls().landing + '/index.html';
+            // Redirect based on role
+            const destination = getPostLoginUrl(result.user);
+            console.log('Redirecting after login to:', destination);
+            window.location.href = destination;
         } else {
             setButtonLoading(submitBtn, false);
             showError(forms.login, result.error || 'Invalid email or password');
@@ -143,9 +151,9 @@ document.addEventListener('DOMContentLoaded', () => {
             successDiv.textContent = 'Account created successfully! Redirecting to your profile...';
             forms.signup.insertBefore(successDiv, forms.signup.firstChild);
             
-            // Redirect to home page
+            // Redirect based on role
             setTimeout(() => {
-                window.location.href = window.getModuleUrls().landing + '/index.html';
+                window.location.href = getPostLoginUrl(result.user);
             }, 1500);
         } else {
             setButtonLoading(submitBtn, false);
@@ -181,8 +189,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const result = await loginWithOtp(email, otp);
         setButtonLoading(btn, false);
         if (result.success) {
-            // Cookie is set by backend, just redirect
-            window.location.href = '/';
+            if (result.user) {
+                localStorage.setItem('careersync_user', JSON.stringify(result.user));
+            }
+            if (result.token) {
+                localStorage.setItem('careersync_token', result.token);
+            }
+            window.location.href = getPostLoginUrl(result.user);
         } else {
             showError(forms.verify, result.error || 'Invalid OTP');
         }
@@ -323,10 +336,16 @@ async function handleGoogleSignIn(response) {
             throw new Error(data.error || 'Google Sign-In failed');
         }
 
-        // Backend sets the cookie, just redirect
+        if (data.user) {
+            localStorage.setItem('careersync_user', JSON.stringify(data.user));
+        }
+        if (data.token) {
+            localStorage.setItem('careersync_token', data.token);
+        }
+
         console.log('Google Sign-In successful, redirecting...');
         setTimeout(() => {
-            window.location.href = window.getModuleUrls().landing + '/';
+            window.location.href = getPostLoginUrl(data.user);
         }, 100);
     } catch (error) {
         console.error('Error handling Google Sign-In:', error);

@@ -41,6 +41,9 @@ const moduleUrls = (typeof window.getModuleUrls === 'function')
 // Header HTML Template
 const createHeaderHTML = (user, authenticated) => {
   const displayName = user?.name || user?.email?.split('@')[0] || 'User';
+  const adminShortcut = user?.role === 'admin'
+    ? `<a href="${moduleUrls.landing}/admin-dashboard.html" style="font-size: 13px; font-weight: 600; color: #4F46E5; text-decoration: none; margin-right: 8px;">Admin Dashboard</a>`
+    : '';
   
   return `
     <header style="
@@ -133,6 +136,7 @@ const createHeaderHTML = (user, authenticated) => {
         <!-- Auth Section -->
         <div style="display: flex; align-items: center; gap: 16px;">
           ${authenticated ? `
+            ${adminShortcut}
             <a href="${moduleUrls.landing}/profile.html" style="
               display: flex;
               align-items: center;

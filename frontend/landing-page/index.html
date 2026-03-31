@@ -345,9 +345,13 @@
                     const displayName = userData.name || userData.full_name || userData.email?.split('@')[0] || 'User';
                     const initials = displayName.charAt(0).toUpperCase();
                     const profileUrl = '/profile.html';
+                    const adminLink = userData.role === 'admin'
+                        ? `<a href="/admin-dashboard.html" style="color: #4F46E5; font-size: 0.82rem; font-weight: 700; text-decoration: none; margin-right: 4px;">Admin Dashboard</a>`
+                        : '';
                     
                     authContainer.innerHTML = `
                         <div style="display: flex; align-items: center; gap: 12px;">
+                            ${adminLink}
                             <a href="${profileUrl}" onclick="saveUserProfileData()" style="color: var(--text-secondary); font-size: 0.875rem; text-decoration: none; display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 8px; transition: background 0.2s;" onmouseover="this.style.background='rgba(248, 250, 252, 1)'" onmouseout="this.style.background='transparent'">
                                 <span style="display: inline-block; width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%); color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 15px; box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);">
                                     ${initials}

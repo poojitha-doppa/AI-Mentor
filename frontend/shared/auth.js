@@ -43,7 +43,9 @@ let currentUser = null;
 let authCheckPromise = null;
 
 // Check current authentication status
-export async function checkAuth() {
+export async function checkAuth(options = {}) {
+    const { allowLocalFallback = true } = options;
+
     // Return existing promise if check is already in progress
     if (authCheckPromise) {
         return authCheckPromise;
@@ -75,16 +77,18 @@ export async function checkAuth() {
             console.warn('Backend auth check failed:', error);
         }
 
-        // Fallback: Check localStorage for user data (demo/offline mode)
-        try {
-            const userFromStorage = localStorage.getItem('careersync_user');
-            if (userFromStorage) {
-                currentUser = JSON.parse(userFromStorage);
-                console.log('✅ Using localStorage auth:', currentUser.email);
-                return currentUser;
+        if (allowLocalFallback) {
+            // Fallback: Check localStorage for user data (demo/offline mode)
+            try {
+                const userFromStorage = localStorage.getItem('careersync_user');
+                if (userFromStorage) {
+                    currentUser = JSON.parse(userFromStorage);
+                    console.log('✅ Using localStorage auth:', currentUser.email);
+                    return currentUser;
+                }
+            } catch (error) {
+                console.error('Error parsing localStorage user:', error);
             }
-        } catch (error) {
-            console.error('Error parsing localStorage user:', error);
         }
 
         currentUser = null;
@@ -98,17 +102,22 @@ export async function checkAuth() {
 }
 
 // Get current user (from cache or fetch)
-export async function getCurrentUser() {
+export async function getCurrentUser(options = {}) {
     if (currentUser) {
         return currentUser;
     }
-    return await checkAuth();
+    return await checkAuth(options);
 }
 
 // Check if user is logged in
-export async function isAuthenticated() {
-    const user = await getCurrentUser();
+export async function isAuthenticated(options = {}) {
+    const user = await getCurrentUser(options);
     return !!user;
+}
+
+export async function isAdmin(options = {}) {
+    const user = await getCurrentUser(options);
+    return Boolean(user && user.role === 'admin');
 }
 
 // Logout user
@@ -136,12 +145,29 @@ export async function logout() {
 }
 
 // Redirect to login if not authenticated
-export async function requireAuth() {
-    const authenticated = await isAuthenticated();
+export async function requireAuth(options = {}) {
+    const authenticated = await isAuthenticated(options);
     if (!authenticated) {
         window.location.href = '/auth.html';
         return false;
     }
+    return true;
+}
+
+export async function requireAdmin() {
+    // Admin pages require server-validated auth only; no localStorage-only fallback.
+    const strictOptions = { allowLocalFallback: false };
+    const authenticated = await requireAuth(strictOptions);
+    if (!authenticated) {
+        return false;
+    }
+
+    const admin = await isAdmin(strictOptions);
+    if (!admin) {
+        document.body.innerHTML = '<h1 style="font-family: system-ui; padding: 2rem;">Access Denied</h1>';
+        return false;
+    }
+
     return true;
 }
 

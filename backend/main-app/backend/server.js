@@ -19,6 +19,7 @@ import courseRoutes from './routes/courses.js';
 import roadmapRoutes from './routes/roadmaps.js';
 import skillEvalRoutes from './routes/skillEval.js';
 import profileRoutes from './routes/profile.js';
+import adminRoutes from './routes/admin.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -60,6 +61,7 @@ app.use('/api/courses', courseRoutes);
 app.use('/api/roadmaps', roadmapRoutes);
 app.use('/api/skills', skillEvalRoutes);
 app.use('/api/profile', profileRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Error Handler
 app.use((err, req, res, next) => {

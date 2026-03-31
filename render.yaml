@@ -28,6 +28,8 @@ services:
         sync: false
       - key: OPENROUTER_API_KEY
         sync: false
+      - key: ADMIN_EMAILS
+        value: harishbonu3@gmail.com,poojithadoppa8@gmail.com
 
   # Course Generation Frontend
   - type: web

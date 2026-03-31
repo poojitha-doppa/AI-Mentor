@@ -13,16 +13,16 @@ function useLocalStorageAuth(email, password, action = 'login') {
     if (users[email]) {
       return { success: false, error: 'User already exists' };
     }
-    users[email] = { email, password, name: '', createdAt: new Date().toISOString() };
+    users[email] = { email, password, name: '', role: 'user', createdAt: new Date().toISOString() };
     localStorage.setItem('careersync_users', JSON.stringify(users));
-    return { success: true, user: { email, name: '' } };
+    return { success: true, user: { email, name: '', role: 'user' } };
   }
   
   if (action === 'login') {
     if (!users[email] || users[email].password !== password) {
       return { success: false, error: 'Invalid email or password' };
     }
-    return { success: true, user: { email, name: users[email].name || '' } };
+    return { success: true, user: { email, name: users[email].name || '', role: users[email].role || 'user' } };
   }
 }
 
@@ -147,7 +147,7 @@ export async function loginWithOtp(email, otp) {
       if (age < 5 * 60 * 1000) { // 5 minute validity
         localStorage.removeItem(`otp_${email}`);
         localStorage.removeItem(`otp_time_${email}`);
-        return { success: true, user: { email } };
+        return { success: true, user: { email, role: 'user' } };
       }
     }
     
@@ -161,7 +161,10 @@ export async function loginWithOtp(email, otp) {
     if (!resp.ok) {
       return { success: false, error: data.error || 'Invalid OTP' };
     }
-    return { success: true, user: data.user };
+    if (data.token) {
+      localStorage.setItem('careersync_token', data.token);
+    }
+    return { success: true, user: data.user, token: data.token };
   } catch (error) {
     console.error('OTP login error:', error);
     return { success: false, error: 'Network error. Please try again.' };

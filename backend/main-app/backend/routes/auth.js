@@ -4,13 +4,10 @@ import bcryptjs from 'bcryptjs';
 import User from '../models/User.js';
 import { sendOtpEmail } from '../services/email.js';
 import { getDeviceInfo, generateSessionId } from '../utils/deviceDetector.js';
+import { normalizeEmail, isAdminEmail, ensureAdminRole } from '../config/admin.js';
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
-const ADMIN_EMAILS = new Set([
-  'harishbonu3@gmail.com',
-  'poojithadoppa8@gmail.com'
-]);
 
 const EMAILJS_SERVICE_ID = process.env.EMAILJS_SERVICE_ID;
 const EMAILJS_TEMPLATE_ID = process.env.EMAILJS_TEMPLATE_ID;
@@ -35,20 +32,14 @@ function setAuthCookie(res, token) {
   res.cookie('Career_Sync_token', token, COOKIE_OPTIONS);
 }
 
-function normalizeEmail(email = '') {
-  return String(email).trim().toLowerCase();
-}
-
-function isAdminEmail(email = '') {
-  return ADMIN_EMAILS.has(normalizeEmail(email));
-}
-
-async function ensureAdminRole(user) {
-  if (user && isAdminEmail(user.email) && user.role !== 'admin') {
-    user.role = 'admin';
-    await user.save();
-  }
-  return user;
+function buildSessionPayload(user, sessionId) {
+  return {
+    id: user._id,
+    email: user.email,
+    role: user.role,
+    isAdmin: user.role === 'admin',
+    ...(sessionId ? { sessionId } : {})
+  };
 }
 
 // Register/Signup endpoint
@@ -75,7 +66,7 @@ router.post('/register', async (req, res) => {
       role: isAdminEmail(normalizedEmail) ? 'admin' : 'user'
     });
 
-    const token = jwt.sign({ id: user._id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign(buildSessionPayload(user), JWT_SECRET, { expiresIn: '7d' });
     setAuthCookie(res, token);
     res.json({ 
       message: 'User registered successfully',
@@ -122,11 +113,7 @@ router.post('/login', async (req, res) => {
     await user.recordDeviceLogin(mergedDeviceInfo);
 
     const sessionId = generateSessionId();
-    const token = jwt.sign({ 
-      id: user._id, 
-      email: user.email,
-      sessionId
-    }, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign(buildSessionPayload(user, sessionId), JWT_SECRET, { expiresIn: '7d' });
 
     setAuthCookie(res, token);
     
@@ -222,15 +209,12 @@ router.post('/login-otp', async (req, res) => {
     await user.recordDeviceLogin(mergedDeviceInfo);
 
     const sessionId = generateSessionId();
-    const token = jwt.sign({ 
-      id: user._id, 
-      email: user.email,
-      sessionId
-    }, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign(buildSessionPayload(user, sessionId), JWT_SECRET, { expiresIn: '7d' });
     
     setAuthCookie(res, token);
     res.json({
       message: 'Login successful',
+      token,
       user: user.toSafeObject(),
       devices: user.getActiveDevices(),
       sessionId,
@@ -343,10 +327,11 @@ router.post('/reset-password', async (req, res) => {
     await user.save();
 
     // Generate token for auto-login
-    const token = jwt.sign({ id: user._id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign(buildSessionPayload(user), JWT_SECRET, { expiresIn: '7d' });
     setAuthCookie(res, token);
     res.json({ 
       message: 'Password reset successful',
+      token,
       user: { id: user._id, email: user.email, name: user.name, role: user.role }
     });
   } catch (error) {
@@ -397,11 +382,12 @@ router.post('/google-signin', async (req, res) => {
     await user.recordLogin();
 
     // Generate JWT token
-    const token = jwt.sign({ id: user._id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign(buildSessionPayload(user), JWT_SECRET, { expiresIn: '7d' });
     setAuthCookie(res, token);
 
     res.json({
       message: 'Google Sign-In successful',
+      token,
       user: user.toSafeObject()
     });
   } catch (error) {
